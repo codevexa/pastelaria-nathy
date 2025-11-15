@@ -1,138 +1,143 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Pastelaria da Nathy — Pedidos</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Pastelaria da Nathy — Sistema</title>
 
-<!-- Supabase JS (UMD) -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.34.0/dist/umd/supabase.min.js"></script>
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- jsPDF (opcional para PDF) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-  :root{
-    --bg:#fff0f6; --card:#fff; --accent:#d63384; --btn:#ff4da6; --muted:#666;
-  }
-  *{box-sizing:border-box}
-  body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);-webkit-font-smoothing:antialiased;}
-  .app{max-width:520px;margin:0 auto;padding:14px}
-  h1{text-align:center;color:var(--accent);margin:10px 0 14px;font-size:22px}
-  .card{background:var(--card);border-radius:12px;padding:12px;margin-bottom:12px;box-shadow:0 6px 18px rgba(214,51,132,0.06)}
-  label{display:block;font-weight:700;margin:8px 0 6px;font-size:14px}
-  input[type="text"],input[type="number"],select,textarea,input[type="date"]{
-    width:100%;padding:12px;border-radius:10px;border:1px solid #ffd6eb;font-size:16px;box-sizing:border-box;
-  }
-  textarea{min-height:64px;resize:none}
-  .row{display:flex;gap:8px}
-  .col{flex:1}
-  .btn{background:var(--btn);color:#fff;border:0;padding:12px;border-radius:12px;font-weight:800;font-size:16px;cursor:pointer}
-  .btn.secondary{background:#ffb3d9;color:#fff}
-  .btn.ghost{background:transparent;border:2px solid #ffd6eb;color:var(--accent)}
-  .small{font-size:13px;color:var(--muted)}
-  table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px}
-  th,td{padding:8px;border-bottom:1px solid #fff2f7;text-align:left}
-  th{background:#ffd6eb;color:#fff}
-  .actions button{margin-right:6px;padding:6px 8px;border-radius:8px;border:0;cursor:pointer}
-  .edit{background:#28a745;color:#fff}
-  .del{background:#c8234f;color:#fff}
-  .totals{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
-  .box{flex:1;background:#fff;padding:10px;border-radius:10px;text-align:center;font-weight:800}
-  .vendorTotals{margin-top:8px}
-  .filterRow{display:flex;gap:8px;align-items:center;margin-top:6px}
-  @media (max-width:420px){ .row, .filterRow{flex-direction:column} .btn{font-size:18px} input,select{font-size:18px;padding:14px} }
+:root{
+  --bg:#fff0f6; --card:#fff; --accent:#d63384; --btn:#ff4da6; --muted:#666;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);-webkit-font-smoothing:antialiased}
+.app{max-width:720px;margin:0 auto;padding:16px}
+.header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+h1{color:var(--accent);margin:0;font-size:20px}
+.card{background:var(--card);border-radius:12px;padding:12px;margin:12px 0;box-shadow:0 6px 18px rgba(214,51,132,0.06)}
+label{display:block;font-weight:700;margin:8px 0 6px;font-size:14px}
+input[type="text"],input[type="email"],input[type="password"],input[type="number"],select,textarea,input[type="date"]{
+  width:100%;padding:10px;border-radius:10px;border:1px solid #ffd6eb;font-size:16px;margin-bottom:6px;
+}
+textarea{min-height:72px}
+.row{display:flex;gap:8px}
+.col{flex:1}
+.btn{background:var(--btn);color:#fff;border:0;padding:10px;border-radius:10px;font-weight:800;cursor:pointer}
+.btn.secondary{background:#ffb3d9}
+.btn.ghost{background:transparent;border:2px solid #ffd6eb;color:var(--accent)}
+.small{font-size:13px;color:var(--muted)}
+.table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px}
+.table th{background:#ffd6eb;color:#fff;padding:8px;text-align:left}
+.table td{background:#fff;padding:8px;border-bottom:1px solid #fff2f7}
+.actions button{margin-right:6px;padding:6px 8px;border-radius:8px;border:0;cursor:pointer}
+.edit{background:#28a745;color:#fff}
+.del{background:#c8234f;color:#fff}
+.totals{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.box{flex:1;background:#fff;padding:10px;border-radius:10px;text-align:center;font-weight:800}
+.footer{font-size:13px;color:#666;text-align:center;margin-top:12px}
+@media (max-width:520px){ .row{flex-direction:column} input, select {font-size:18px;padding:12px} .btn{font-size:18px;padding:12px} }
 </style>
 </head>
 <body>
   <div class="app">
 
-    <h1>Pastelaria da Nathy</h1>
-
-    <!-- LOGIN -->
-    <div id="loginCard" class="card">
-      <label>Usuário</label>
-      <select id="loginUser">
-        <option>Nathy</option>
-        <option>Jean</option>
-        <option>Juan</option>
-      </select>
-
-      <label>PIN</label>
-      <input id="loginPin" placeholder="Digite o PIN (ex: 1234)" type="password"/>
-
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <button class="btn" id="btnLogin">Entrar</button>
-        <button class="btn secondary" id="btnClearLocal">Limpar local</button>
+    <div class="header">
+      <h1>Pastelaria da Nathy</h1>
+      <div>
+        <button class="btn ghost" id="btnToAuth">Auth</button>
+        <button class="btn ghost" id="btnToApp">App</button>
       </div>
-
-      <p class="small" style="margin-top:8px">PIN padrão: <b>1234</b></p>
     </div>
 
-    <!-- APP -->
-    <div id="appUI" style="display:none">
+    <!-- ===== AUTH CARD ===== -->
+    <div id="authCard" class="card">
+      <h3>Autenticação (Supabase Auth)</h3>
 
-      <!-- Formulário de pedido -->
+      <label>Email</label>
+      <input id="authEmail" type="email" placeholder="seu@email.com">
+
+      <label>Senha</label>
+      <input id="authPass" type="password" placeholder="min 6 caracteres">
+
+      <div class="row">
+        <button class="btn" id="btnSignUp">Criar conta</button>
+        <button class="btn secondary" id="btnSignIn">Entrar</button>
+      </div>
+
+      <p class="small">Se preferir usar PIN local: use o botão "Entrar sem conta" abaixo.</p>
+      <div class="row">
+        <button class="btn ghost" id="btnGuest">Entrar sem conta (PIN)</button>
+        <input id="guestPin" placeholder="PIN (ex: 1234)" style="width:150px">
+      </div>
+
+      <div id="authMessage" class="small" style="margin-top:8px;color:#555"></div>
+    </div>
+
+    <!-- ===== MAIN APP ===== -->
+    <div id="mainApp" style="display:none">
+      <!-- FORM -->
       <div class="card" id="formCard">
         <label>Data</label>
-        <input type="date" id="inputDate">
+        <input type="date" id="data" />
 
         <label>Vendedor</label>
-        <select id="inputVendedor">
+        <select id="vendedor">
           <option>Nathy</option>
           <option>Jean</option>
           <option>Juan</option>
         </select>
 
         <label>Cliente</label>
-        <input type="text" id="inputCliente" placeholder="Nome do cliente" />
+        <input id="cliente" placeholder="Nome do cliente (digite)">
 
         <label>Item</label>
-        <select id="inputItem">
+        <select id="item">
           <option>Carne com Cheddar</option>
           <option>Frango com Cheddar</option>
           <option>Carne com Requeijão</option>
           <option>Frango com Requeijão</option>
         </select>
 
-        <div class="row" style="margin-top:6px">
+        <div class="row">
           <div class="col">
             <label>Quantidade</label>
-            <input type="number" id="inputQtd" min="1" value="1" />
+            <input type="number" id="quantidade" min="1" value="1">
           </div>
           <div class="col">
             <label>Com refri?</label>
-            <select id="inputRefri">
-              <option value="0">Não</option>
-              <option value="1">Sim (+R$2)</option>
-            </select>
+            <select id="com_refri"><option value="0">Não</option><option value="1">Sim (+R$2)</option></select>
           </div>
         </div>
 
         <label>Pago?</label>
-        <select id="inputPago">
-          <option value="1">Sim</option>
-          <option value="0">Não</option>
-        </select>
+        <select id="pago"><option value="1">Sim</option><option value="0">Não</option></select>
 
         <label>Observação</label>
-        <textarea id="inputObs" placeholder="Ex: sem cebola, entrega..."></textarea>
+        <textarea id="obs" placeholder="Ex: sem cebola"></textarea>
 
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <button class="btn" id="saveBtn">Adicionar</button>
-          <button class="btn secondary" id="clearBtn">Limpar</button>
+        <div class="row" style="margin-top:8px">
+          <button class="btn" id="btnSave">Adicionar</button>
+          <button class="btn secondary" id="btnClear">Limpar</button>
         </div>
 
         <input type="hidden" id="editId" value="">
-        <p class="small" style="margin-top:8px">Pastel R$10 • Refri R$2</p>
+        <p class="small">Pastel R$10 • Refri R$2</p>
       </div>
 
-      <!-- filtros e ações -->
+      <!-- FILTERS -->
       <div class="card">
-        <div class="filterRow">
-          <div style="flex:1">
-            <label>Filtrar por data</label>
+        <div class="row">
+          <div class="col">
+            <label>Filtrar data</label>
             <input type="date" id="filterDate">
           </div>
-
-          <div style="width:150px">
+          <div style="width:160px">
             <label>Vendedor</label>
             <select id="filterVendor">
               <option value="">Todos</option>
@@ -143,14 +148,15 @@
           </div>
         </div>
 
-        <div style="display:flex;gap:8px;margin-top:10px">
+        <div style="display:flex;gap:8px;margin-top:8px">
           <button class="btn" id="btnReload">Atualizar</button>
-          <button class="btn ghost" id="btnExport">Exportar CSV</button>
-          <button class="btn ghost" id="btnLogout">Sair</button>
+          <button class="btn ghost" id="btnCSV">Exportar CSV</button>
+          <button class="btn ghost" id="btnPDF">Gerar PDF</button>
+          <button class="btn ghost" id="btnSignOut">Sair</button>
         </div>
       </div>
 
-      <!-- tabela e totais -->
+      <!-- TABLE + totals -->
       <div class="card">
         <h3 style="margin:0 0 8px 0">Vendas</h3>
         <div id="tableWrap"></div>
@@ -161,212 +167,204 @@
           <div class="box">Geral<br><span id="totalAll">R$ 0,00</span></div>
         </div>
 
-        <div class="vendorTotals" style="margin-top:10px">
-          <div style="display:flex;gap:8px">
-            <div style="flex:1;background:#fff;padding:8px;border-radius:10px">Nathy: <span id="vtNathy">R$ 0,00</span></div>
-            <div style="flex:1;background:#fff;padding:8px;border-radius:10px">Jean: <span id="vtJean">R$ 0,00</span></div>
-            <div style="flex:1;background:#fff;padding:8px;border-radius:10px">Juan: <span id="vtJuan">R$ 0,00</span></div>
-          </div>
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <div style="flex:1;background:#fff;padding:8px;border-radius:10px">Nathy: <span id="vtNathy">R$0,00</span></div>
+          <div style="flex:1;background:#fff;padding:8px;border-radius:10px">Jean: <span id="vtJean">R$0,00</span></div>
+          <div style="flex:1;background:#fff;padding:8px;border-radius:10px">Juan: <span id="vtJuan">R$0,00</span></div>
         </div>
       </div>
-
     </div>
+
+    <p class="footer">Feito pra você — me diz se quer mudanças rápidas no layout.</p>
   </div>
 
 <script>
-/* ================= CONFIG (use seus valores) ================= */
+/* ================= CONFIG SUPABASE ================= */
 const SUPABASE_URL = "https://kvdlwnlviedisywdykty.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt2ZGx3bmx2aWVkaXN5d2R5a3R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxNjQ4MDcsImV4cCI6MjA3ODc0MDgwN30.pWBQRyjFIWbnDzX0tQhAuyYUwEfmyK6HPm5jzUlpp3Q";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt2ZGx3bmx2aWVkaXN5d2R5a3R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxNjQ4MDcsImV4cCI6MjA3ODc0MDgwN30.pWBQRyjFIWbnDzX0tQhAuyYUwEfmyK6HPm5jzUlpp3Q";
+const supabase = supabaseJs.createClient ? supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-/* inicializa supabase */
-const supabase = supabaseJs.createClient
-  ? supabaseJs.createClient(SUPABASE_URL, SUPABASE_KEY)
-  : supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-/* util */
-const $ = (s)=>document.querySelector(s);
+/* ========== HELPERS ========== */
+const $ = s=>document.querySelector(s);
+const formatBRL = n=> 'R$ ' + Number(n||0).toFixed(2).replace('.',',');
 const todayISO = ()=> new Date().toISOString().slice(0,10);
-const formatBRL = (n)=> 'R$ ' + Number(n||0).toFixed(2).replace('.',',');
+function escapeHtml(s){ if(!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-/* init UI defaults */
+/* ========== INIT UI ========== */
 $('#filterDate').value = todayISO();
-$('#inputDate').value = todayISO();
+$('#data').value = todayISO();
+$('#btnToAuth').addEventListener('click', ()=>{ $('#authCard').scrollIntoView({behavior:'smooth'}) });
+$('#btnToApp').addEventListener('click', ()=>{ $('#mainApp').scrollIntoView({behavior:'smooth'}) });
 
-/* LOGIN */
-$('#btnLogin').addEventListener('click', ()=>{
-  const pin = $('#loginPin').value.trim();
-  const user = $('#loginUser').value;
+/* ========== AUTH ========== */
+$('#btnSignUp').addEventListener('click', async ()=>{
+  const email = $('#authEmail').value.trim();
+  const pass = $('#authPass').value.trim();
+  if(!email || !pass){ $('#authMessage').innerText = 'Preencha email e senha'; return; }
+  const { data, error } = await supabase.auth.signUp({ email, password: pass });
+  if(error){ $('#authMessage').innerText = 'Erro: ' + error.message; return; }
+  $('#authMessage').innerText = 'Conta criada. Verifique seu e-mail.';
+});
+
+$('#btnSignIn').addEventListener('click', async ()=>{
+  const email = $('#authEmail').value.trim();
+  const pass = $('#authPass').value.trim();
+  if(!email || !pass){ $('#authMessage').innerText = 'Preencha email e senha'; return; }
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
+  if(error){ $('#authMessage').innerText = 'Erro: ' + error.message; return; }
+  $('#authMessage').innerText = 'Logado: ' + (data.user?.email || '');
+  enterApp(); 
+});
+
+$('#btnGuest').addEventListener('click', ()=>{
+  const pin = $('#guestPin').value.trim();
+  if(pin === '' ) { alert('Insira PIN'); return; }
   if(pin === '1234'){
-    // show app
-    $('#loginCard').style.display = 'none';
-    $('#appUI').style.display = 'block';
-    // default vendedor in form = logged user
-    $('#inputVendedor').value = user;
-    $('#filterVendor').value = '';
-    loadSales();
-  } else {
-    alert('PIN incorreto');
-  }
+    // guest login via PIN - show app
+    enterApp(true);
+  } else alert('PIN incorreto');
 });
 
-/* clear local storage for debugging (optional) */
-$('#btnClearLocal').addEventListener('click', ()=>{
-  if(confirm('Remover dados locais (não afeta Supabase)?')) {
-    localStorage.clear();
-    alert('LocalStorage limpo.');
-  }
+/* sign out */
+$('#btnSignOut').addEventListener('click', async ()=>{
+  await supabase.auth.signOut();
+  location.reload();
 });
 
-/* LOGOUT */
-$('#btnLogout').addEventListener('click', ()=>{
-  if(confirm('Sair do app?')) {
-    location.reload();
+/* enter app after auth */
+function enterApp(guest=false){
+  $('#authCard').style.display = 'none';
+  $('#mainApp').style.display = 'block';
+  // if logged in from Supabase, set default vendedor to email localname
+  if(!guest){
+    const user = supabase.auth.getUser ? null : null; // not necessary
+    // we won't auto-set vendedor from auth — user selects
   }
-});
+  loadSales();
+}
 
-/* ADD / UPDATE */
-$('#saveBtn').addEventListener('click', async ()=>{
+/* ========== CRUD pedidos ========== */
+$('#btnSave').addEventListener('click', async ()=>{
   const id = $('#editId').value || null;
-  const vendedor = $('#inputVendedor').value;
-  const cliente = $('#inputCliente').value.trim();
-  const item = $('#inputItem').value;
-  const quantidade = Math.max(1, parseInt($('#inputQtd').value) || 1);
-  const com_refri = $('#inputRefri').value === '1';
-  const pago = $('#inputPago').value === '1';
-  const obs = $('#inputObs').value.trim();
-  const data = $('#inputDate').value || todayISO();
+  const dataVal = $('#data').value || todayISO();
+  const vendedor = $('#vendedor').value;
+  const cliente = $('#cliente').value.trim();
+  const item = $('#item').value;
+  const quantidade = Math.max(1, parseInt($('#quantidade').value) || 1);
+  const com_refri = $('#com_refri').value === '1';
+  const pago = $('#pago').value === '1';
+  const obs = $('#obs').value.trim();
   const valor = (10 * quantidade) + (com_refri ? 2 : 0);
 
   if(!cliente){ alert('Preencha o nome do cliente'); return; }
 
   if(id){
-    // update
     const { error } = await supabase.from('pedidos').update({
-      vendedor, cliente, item, quantidade, com_refri, pago, obs, data, valor
+      data: dataVal, vendedor, cliente, item, quantidade, com_refri, pago, obs, valor
     }).eq('id', id);
     if(error){ alert('Erro ao atualizar: ' + error.message); return; }
     $('#editId').value = '';
-    $('#saveBtn').innerText = 'Adicionar';
+    $('#btnSave').innerText = 'Adicionar';
   } else {
-    // insert
     const { error } = await supabase.from('pedidos').insert([{
-      vendedor, cliente, item, quantidade, com_refri, pago, obs, data, valor
+      data: dataVal, vendedor, cliente, item, quantidade, com_refri, pago, obs, valor
     }]);
     if(error){ alert('Erro ao salvar: ' + error.message); return; }
   }
-
   clearForm();
   await loadSales();
 });
 
-/* clear form */
-$('#clearBtn').addEventListener('click', clearForm);
+$('#btnClear').addEventListener('click', clearForm);
 function clearForm(){
-  $('#inputCliente').value = '';
-  $('#inputQtd').value = '1';
-  $('#inputRefri').value = '0';
-  $('#inputPago').value = '1';
-  $('#inputObs').value = '';
+  $('#cliente').value = '';
+  $('#quantidade').value = '1';
+  $('#com_refri').value = '0';
+  $('#pago').value = '1';
+  $('#obs').value = '';
   $('#editId').value = '';
-  $('#saveBtn').innerText = 'Adicionar';
-  $('#inputDate').value = todayISO();
+  $('#btnSave').innerText = 'Adicionar';
+  $('#data').value = todayISO();
 }
 
-/* load / filter */
+/* ========== LOAD / RENDER ========== */
 $('#btnReload').addEventListener('click', loadSales);
 $('#filterDate').addEventListener('change', loadSales);
 $('#filterVendor').addEventListener('change', loadSales);
-$('#btnExport').addEventListener('click', exportCSV);
+$('#btnCSV').addEventListener('click', exportCSV);
+$('#btnPDF').addEventListener('click', generatePDF);
 
 async function loadSales(){
   const date = $('#filterDate').value;
   const vendor = $('#filterVendor').value;
 
-  // build query
-  let q = supabase.from('pedidos').select('*').order('data',{ascending:false});
-  if(date){
-    // filter by date field equality (data stored as text/date in 'YYYY-MM-DD')
-    q = q.eq('data', date);
-  }
+  let q = supabase.from('pedidos').select('*').order('criado_em',{ascending:false});
+  if(date) q = q.eq('data', date);
   if(vendor) q = q.eq('vendedor', vendor);
 
   const { data, error } = await q;
   if(error){ console.error(error); alert('Erro ao carregar: ' + error.message); return; }
-
   renderTable(data || []);
   renderTotals(data || []);
 }
 
-/* render table */
 function renderTable(rows){
-  let html = `<table><thead><tr>
+  let html = `<table class="table"><thead><tr>
     <th>Hora</th><th>Vendedor</th><th>Cliente</th><th>Item</th><th>Qtd</th><th>Refri</th><th>Pago</th><th style="text-align:right">Valor</th><th></th>
   </tr></thead><tbody>`;
-
-  rows.forEach(r=>{
-    // r.data may be date string or timestamp; show time portion if timestamp else empty
-    let time = '';
-    try {
-      const d = new Date(r.criado_em || r.data || r.created_at || r.timestamp);
-      if(!isNaN(d)) time = d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-    } catch(e){ time = ''; }
-
+  (rows||[]).forEach(r=>{
+    const time = r.criado_em ? new Date(r.criado_em).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
     html += `<tr>
       <td>${time}</td>
       <td>${escapeHtml(r.vendedor)}</td>
       <td>${escapeHtml(r.cliente)}</td>
       <td>${escapeHtml(r.item)}</td>
       <td style="text-align:center">${r.quantidade}</td>
-      <td style="text-align:center">${r.com_refri ? 'Sim' : 'Não'}</td>
-      <td style="text-align:center">${r.pago ? 'Sim' : 'Não'}</td>
+      <td style="text-align:center">${r.com_refri? 'Sim':'Não'}</td>
+      <td style="text-align:center">${r.pago? 'Sim':'Não'}</td>
       <td style="text-align:right">${formatBRL(r.valor)}</td>
-      <td style="text-align:center" class="actions">
+      <td style="text-align:center">
         <button class="edit" onclick="startEdit('${r.id}')">Editar</button>
         <button class="del" onclick="deleteSale('${r.id}')">Excluir</button>
       </td>
     </tr>`;
   });
-
   html += `</tbody></table>`;
   $('#tableWrap').innerHTML = html;
 }
 
-/* totals */
 function renderTotals(rows){
   let paid=0, pend=0, all=0;
   const per = { Nathy:0, Jean:0, Juan:0 };
-
-  rows.forEach(r=>{
+  (rows||[]).forEach(r=>{
     const v = Number(r.valor||0);
     all += v;
     if(r.pago) paid += v; else pend += v;
     per[r.vendedor] = (per[r.vendedor]||0) + v;
   });
-
   $('#totalPaid').innerText = formatBRL(paid);
   $('#totalPending').innerText = formatBRL(pend);
   $('#totalAll').innerText = formatBRL(all);
-
-  $('#vtNathy').innerText = formatBRL(per.Nathy || 0);
-  $('#vtJean').innerText = formatBRL(per.Jean || 0);
-  $('#vtJuan').innerText = formatBRL(per.Juan || 0);
+  $('#vtNathy').innerText = formatBRL(per.Nathy||0);
+  $('#vtJean').innerText = formatBRL(per.Jean||0);
+  $('#vtJuan').innerText = formatBRL(per.Juan||0);
 }
 
-/* edit / delete */
+/* ========== EDIT / DELETE ========== */
 async function startEdit(id){
   const { data, error } = await supabase.from('pedidos').select('*').eq('id', id).single();
-  if(error){ alert('Erro ao buscar registro: '+error.message); return; }
+  if(error){ alert('Erro ao buscar registro: ' + error.message); return; }
   const r = data;
-  $('#inputDate').value = r.data || todayISO();
-  $('#inputVendedor').value = r.vendedor || '';
-  $('#inputCliente').value = r.cliente || '';
-  $('#inputItem').value = r.item || '';
-  $('#inputQtd').value = r.quantidade || 1;
-  $('#inputRefri').value = r.com_refri ? '1' : '0';
-  $('#inputPago').value = r.pago ? '1' : '0';
-  $('#inputObs').value = r.obs || '';
+  $('#data').value = r.data || todayISO();
+  $('#vendedor').value = r.vendedor || '';
+  $('#cliente').value = r.cliente || '';
+  $('#item').value = r.item || '';
+  $('#quantidade').value = r.quantidade || 1;
+  $('#com_refri').value = r.com_refri ? '1' : '0';
+  $('#pago').value = r.pago ? '1' : '0';
+  $('#obs').value = r.obs || '';
   $('#editId').value = r.id;
-  $('#saveBtn').innerText = 'Salvar alteração';
+  $('#btnSave').innerText = 'Salvar alteração';
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
@@ -377,56 +375,64 @@ async function deleteSale(id){
   await loadSales();
 }
 
-/* export CSV of current filter */
+/* ========== EXPORT CSV / PDF ========== */
 async function exportCSV(){
   const date = $('#filterDate').value;
   const vendor = $('#filterVendor').value;
-  let q = supabase.from('pedidos').select('*').order('data',{ascending:false});
+  let q = supabase.from('pedidos').select('*').order('criado_em',{ascending:false});
   if(date) q = q.eq('data', date);
   if(vendor) q = q.eq('vendedor', vendor);
   const { data, error } = await q;
-  if(error){ alert('Erro: '+error.message); return; }
-  if(!data || data.length === 0){ alert('Nenhum registro para exportar'); return; }
-
+  if(error){ alert('Erro: ' + error.message); return; }
+  if(!data || data.length===0){ alert('Nenhum registro para exportar'); return; }
   const header = ['id','data','vendedor','cliente','item','quantidade','com_refri','pago','valor','obs'];
-  const rows = [header.join(',')];
+  const lines = [header.join(',')];
   data.forEach(r=>{
     const line = [
-      `"${r.id}"`,
-      `"${r.data}"`,
-      `"${(r.vendedor||'').replace(/"/g,'""')}"`,
-      `"${(r.cliente||'').replace(/"/g,'""')}"`,
-      `"${(r.item||'').replace(/"/g,'""')}"`,
-      r.quantidade,
-      r.com_refri ? 1 : 0,
-      r.pago ? 1 : 0,
-      r.valor,
-      `"${(r.obs||'').replace(/"/g,'""')}"`
+      `"${r.id}"`, `"${r.data}"`, `"${(r.vendedor||'').replace(/"/g,'""')}"`,
+      `"${(r.cliente||'').replace(/"/g,'""')}"`, `"${(r.item||'').replace(/"/g,'""')}"`,
+      r.quantidade, r.com_refri?1:0, r.pago?1:0, r.valor, `"${(r.obs||'').replace(/"/g,'""')}"`
     ];
-    rows.push(line.join(','));
+    lines.push(line.join(','));
   });
-
-  const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const blob = new Blob([lines.join('\n')], { type:'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `vendas_${date || 'all'}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
+  const a = document.createElement('a'); a.href = url; a.download = `vendas_${$('#filterDate').value || 'all'}.csv`; a.click(); URL.revokeObjectURL(url);
 }
 
-/* helper */
-function escapeHtml(s){ if(!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function generatePDF(){
+  // basic PDF: list filtered rows
+  (async ()=>{
+    const { jsPDF } = window.jspdf || window.jspdf;
+    if(!jsPDF){ alert('jsPDF não carregado'); return; }
+    const date = $('#filterDate').value;
+    let q = supabase.from('pedidos').select('*').order('criado_em',{ascending:false});
+    if(date) q = q.eq('data', date);
+    const { data, error } = await q;
+    if(error){ alert('Erro: ' + error.message); return; }
+    const doc = new jsPDF();
+    let y = 20;
+    doc.setFontSize(14); doc.text('Fechamento - Pastelaria da Nathy', 14, y); y+=8;
+    doc.setFontSize(10);
+    data.forEach((r, i)=>{
+      const line = `${i+1}) ${r.vendedor} – ${r.cliente} – ${r.item} x${r.quantidade} – ${r.pago?'Pago':'Pend'} – R$ ${Number(r.valor).toFixed(2)}`;
+      if(y > 270){ doc.addPage(); y = 20; }
+      doc.text(line, 14, y); y+=6;
+    });
+    doc.save(`fechamento_${date || 'all'}.pdf`);
+  })();
+}
 
-/* start */
-document.addEventListener('DOMContentLoaded', ()=>{ 
-  // default filter date today
+/* ========== START ========== */
+document.addEventListener('DOMContentLoaded', ()=>{
+  // default filter date = today
   $('#filterDate').value = todayISO();
-  $('#inputDate').value = todayISO();
-  // load today's sales automatically
-  loadSales();
+  $('#data').value = todayISO();
+  // try to detect logged user (optional)
+  // loadSales(); // do only after enterApp/auth
 });
 
+/* ================= END ================= */
 </script>
 </body>
 </html>
