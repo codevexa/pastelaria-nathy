@@ -1,500 +1,305 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Pastelaria da Nathy - App</title>
-
-<!-- jsPDF CDN para gerar PDF -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pastelaria da Nathy</title>
 
 <style>
-  :root{
-    --bg:#ffe6f2;
-    --pink:#ff4da6;
-    --pink-2:#ff82c4;
-    --accent:#d63384;
-    --card:#fff;
-    --text:#222;
-    --success:#28a745;
-    --warn:#e6005c;
-    max-width:450px;
-  }
-  html,body{height:100%}
-  body{
-    margin:0;
-    font-family:Inter,Arial,Helvetica,sans-serif;
-    background:var(--bg);
-    color:var(--text);
-    -webkit-font-smoothing:antialiased;
-    padding:12px;
-    display:flex;
-    justify-content:center;
-  }
-  .app{
-    width:100%;
-    max-width:450px;
-  }
-  h1{
-    text-align:center;
-    color:var(--accent);
-    margin:6px 0 14px;
-    font-size:26px;
-  }
-  .card{
-    background:var(--card);
-    border-radius:14px;
-    padding:14px;
-    box-shadow:0 6px 18px rgba(214,51,132,0.12);
-    margin-bottom:14px;
-  }
-  label{display:block;font-weight:700;margin:8px 0 6px;font-size:16px}
-  input[type="text"], input[type="password"], select, textarea, input[type="date"]{
-    width:100%;
-    padding:12px;
-    border-radius:10px;
-    border:1px solid #ffd6eb;
-    font-size:18px;
-    box-sizing:border-box;
-  }
-  textarea{min-height:72px;resize:none}
-  .row{display:flex;gap:8px}
-  .col{flex:1}
-  button{
-    cursor:pointer;
-    border:0;
-    border-radius:12px;
-    padding:12px;
-    font-weight:700;
-    font-size:18px;
-    color:#fff;
-    background:var(--pink);
-  }
-  .btn-round{
-    width:56px;height:56px;border-radius:50%;padding:0;font-size:26px;background:var(--pink-2);
-  }
-  .status-row{display:flex;gap:8px;margin-top:10px}
-  .status-btn{flex:1;padding:12px;border-radius:10px;font-size:18px;color:#fff}
-  .status-btn.pago{background:var(--success)}
-  .status-btn.pendente{background:var(--warn)}
-  .small{font-size:14px;color:#666;margin-top:6px}
-  table{width:100%;border-collapse:collapse;margin-top:10px;font-size:16px}
-  th{background:#ffd6eb;padding:10px;text-align:left}
-  td{background:#fff;padding:10px;border-bottom:1px solid #ffeaf2}
-  .badge-paid{color:var(--success);font-weight:800}
-  .badge-pend{color:var(--warn);font-weight:800}
-  .actions button{margin-right:6px;padding:8px 10px;border-radius:8px;font-weight:700}
-  .btn-danger{background:#e6005c;color:#fff;border:0}
-  .btn-secondary{background:#ffb3d9;color:#fff;border:0}
-  .totals{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-  .totals .box{flex:1;padding:10px;border-radius:10px;background:#fff;text-align:center;font-weight:700}
-  .link{color:var(--accent);font-weight:700;text-decoration:underline;cursor:pointer}
-  .small-muted{font-size:13px;color:#666}
-  footer{margin:20px 0 40px;text-align:center;color:#777;font-size:13px}
-  /* ensure mobile tappable sizes */
-  @media (max-width:420px){
-    button, .status-btn{font-size:18px;padding:12px}
-  }
+    body {
+        font-family: Arial;
+        background: #ffe5f2;
+        padding: 20px;
+        color: #333;
+        max-width: 450px;
+        margin: auto;
+        font-size: 20px;
+    }
+
+    h2 {
+        text-align: center;
+        color: #d63384;
+        font-size: 28px;
+    }
+
+    h3 {
+        color:#d63384;
+        text-align:center;
+        font-weight: bold;
+    }
+
+    .card {
+        background: white;
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 0 10px #ffb6d6;
+        margin-top: 20px;
+    }
+
+    label {
+        font-weight: bold;
+        display: block;
+        margin-top: 15px;
+    }
+
+    input, select, textarea {
+        width: 100%;
+        padding: 12px;
+        border-radius: 10px;
+        border: 1px solid #ccc;
+        margin-top: 5px;
+        font-size: 18px;
+    }
+
+    button {
+        width: 100%;
+        padding: 14px;
+        background: #ff4da6;
+        border: none;
+        color: white;
+        border-radius: 12px;
+        font-size: 22px;
+        margin-top: 15px;
+        font-weight: bold;
+    }
+
+    .inline {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 10px;
+    }
+
+    .qty-btn {
+        width: 45px;
+        height: 45px;
+        font-size: 26px;
+        border-radius: 50%;
+        border: none;
+        background: #ff82c4;
+        color: white;
+        font-weight: bold;
+    }
+
+    .status-btn {
+        padding: 12px;
+        width: 48%;
+        border-radius: 10px;
+        border: none;
+        font-size: 20px;
+        color: white;
+        font-weight: bold;
+    }
+
+    .pago {
+        background: #28a745;
+    }
+
+    .pendente {
+        background: #dc3545;
+    }
+
+    .result, #historicoDia, #fechamento {
+        margin-top: 20px;
+        font-size: 20px;
+        background: white;
+        padding: 15px;
+        border-radius: 15px;
+        box-shadow: 0 0 10px #ffb6d6;
+    }
+
 </style>
 </head>
-<body>
-  <div class="app">
-    <h1>Pastelaria da Nathy</h1>
 
-    <!-- LOGIN -->
-    <div id="loginView" class="card">
-      <label>Entrar como</label>
-      <select id="userSelect" aria-label="Usuário">
+<body>
+
+<h3 id="usuarioLogado"></h3>
+
+<!-- LOGIN -->
+<div id="login" class="card">
+    <h2>Pastelaria da Nathy</h2>
+
+    <label>Usuário</label>
+    <select id="usuario">
         <option value="Nathy">Nathy</option>
         <option value="Jean">Jean</option>
         <option value="Juan">Juan</option>
-      </select>
+    </select>
 
-      <label>Senha (padrão)</label>
-      <input id="pin" type="password" placeholder="Digite o PIN (ex: 1234)">
+    <label>Senha</label>
+    <input type="password" id="senha" placeholder="Digite sua senha">
 
-      <div style="margin-top:12px" class="row">
-        <div class="col"><button onclick="login()">Entrar</button></div>
-      </div>
+    <button onclick="login()">Entrar</button>
+</div>
 
-      <p class="small">Senha padrão: <b>1234</b>. Depois dá pra trocar no código se quiser.</p>
+<!-- APP PRINCIPAL -->
+<div id="app" style="display:none;">
+
+<div class="card">
+    <label>Data</label>
+    <input type="date" id="data">
+
+    <label>Sabor do Pastel</label>
+    <select id="sabor">
+        <option value="Carne com Cheddar">Carne com Cheddar</option>
+        <option value="Frango com Cheddar">Frango com Cheddar</option>
+        <option value="Carne com Requeijão">Carne com Requeijão</option>
+        <option value="Frango com Requeijão">Frango com Requeijão</option>
+    </select>
+
+    <label>Quantidade</label>
+    <div class="inline">
+        <button class="qty-btn" onclick="alterarQtd(-1)">-</button>
+        <div id="qtd" style="font-size:28px; font-weight:bold;">1</div>
+        <button class="qty-btn" onclick="alterarQtd(1)">+</button>
     </div>
 
-    <!-- APP -->
-    <div id="appView" style="display:none">
-      <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div>
-            <div class="small-muted">Logado como</div>
-            <div style="font-weight:800" id="userLogged"></div>
-          </div>
-          <div>
-            <button class="btn-secondary" onclick="logout()">Sair</button>
-          </div>
-        </div>
-      </div>
+    <label>Com Refri (R$ 2)</label>
+    <select id="refri">
+        <option value="0">Não</option>
+        <option value="2">Sim</option>
+    </select>
 
-      <!-- Formulário de pedido -->
-      <div class="card">
-        <label>Data</label>
-        <input type="date" id="dataPedido">
+    <label>Observação</label>
+    <textarea id="obs" rows="2"></textarea>
 
-        <label>Cliente</label>
-        <input type="text" id="nomeCliente" placeholder="Nome do cliente">
-
-        <label>Sabor</label>
-        <select id="saborSelect">
-          <option>Carne com Cheddar</option>
-          <option>Frango com Cheddar</option>
-          <option>Carne com Requeijão</option>
-          <option>Frango com Requeijão</option>
-        </select>
-
-        <label>Quantidade</label>
-        <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
-          <button class="btn-round" onclick="changeQty(-1)">−</button>
-          <div id="qtdDisplay" style="font-weight:800;font-size:22px;width:50px;text-align:center">1</div>
-          <button class="btn-round" onclick="changeQty(1)">+</button>
-          <div style="flex:1"></div>
-          <div style="text-align:right" class="small-muted">Pastel R$10 | Refri R$2</div>
-        </div>
-
-        <label style="margin-top:12px">Com Refri?</label>
-        <div style="display:flex;gap:8px">
-          <button id="refiNo" class="status-btn pendente" style="flex:1" onclick="setRefri(false)">Não</button>
-          <button id="refiYes" class="status-btn pago" style="flex:1;background:#ff4da6" onclick="setRefri(true)">Sim (+R$2)</button>
-        </div>
-
-        <label>Observação</label>
-        <textarea id="obs" placeholder="Ex: sem requeijão, assado, entrega..."></textarea>
-
-        <label>Status</label>
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <button id="stPago" class="status-btn pago" onclick="setStatus('Pago')">Pago</button>
-          <button id="stPendente" class="status-btn pendente" onclick="setStatus('Pendente')">Pendente</button>
-        </div>
-
-        <div style="margin-top:12px">
-          <button onclick="addPedido()">➕ Registrar Pedido</button>
-        </div>
-      </div>
-
-      <!-- filtros e ações -->
-      <div class="card" style="padding-bottom:12px">
-        <div style="display:flex;gap:8px;align-items:center">
-          <div style="flex:1">
-            <label>Ver pedidos da data</label>
-            <input type="date" id="filtroData" onchange="renderPedidos()">
-          </div>
-          <div style="width:110px">
-            <label style="visibility:hidden">_</label>
-            <button class="btn-secondary" onclick="hoje()">Hoje</button>
-          </div>
-        </div>
-
-        <div style="display:flex;gap:8px;margin-top:10px">
-          <button class="btn-secondary" onclick="exportCSV()">Exportar CSV</button>
-          <button onclick="fecharDia()">Fechar Dia (PDF)</button>
-        </div>
-
-        <div class="small" style="margin-top:8px">Obs: Fechar Dia gera relatório em PDF e permite limpar os pedidos daquele dia.</div>
-      </div>
-
-      <!-- lista -->
-      <div class="card" id="listaCard">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div><strong>Pedidos</strong></div>
-          <div class="small-muted">Total pedidos: <span id="totalCount">0</span></div>
-        </div>
-
-        <table id="tabela">
-          <thead>
-            <tr><th>Hora/Data</th><th>Cliente</th><th>Item</th><th>Qtd</th><th>R$</th><th>Status</th><th></th></tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-
-        <div class="totals" style="margin-top:12px">
-          <div class="box">Pagos: <div id="totPaid">R$0</div></div>
-          <div class="box">Pendentes: <div id="totPend">R$0</div></div>
-          <div class="box">Geral: <div id="totGeral">R$0</div></div>
-        </div>
-      </div>
-
-      <footer>App offline — dados salvos no celular (LocalStorage)</footer>
+    <label>Status</label>
+    <div class="inline">
+        <button class="status-btn pago" onclick="setStatus('Pago')">Pago</button>
+        <button class="status-btn pendente" onclick="setStatus('Pendente')">Pendente</button>
     </div>
-  </div>
+
+    <button onclick="registrar()">Registrar Pedido</button>
+    <button onclick="mostrarHistorico()">Ver Histórico</button>
+    <button onclick="fecharDia()">Fechar Dia</button>
+</div>
+
+<div id="resultado"></div>
+<div id="historicoDia"></div>
+<div id="fechamento"></div>
+
+</div>
 
 <script>
-/* ====== Config iniciais ====== */
-const USERS = ['Nathy','Jean','Juan'];
-const DEFAULT_PIN = '1234';
-const BASE_PRICE = 10;
-const REF_PRICE = 2;
+let usuarioAtivo = "";
+let statusPedido = "Pendente";
 
-let currentUser = null;
-let pedidos = JSON.parse(localStorage.getItem('pastel_pedidos_v1') || '[]');
+let pedidos = JSON.parse(localStorage.getItem("pedidosNathy") || "[]");
+let totaisVendedores = JSON.parse(localStorage.getItem("totaisVendedoresNathy") || `{
+    "Nathy": 0,
+    "Jean": 0,
+    "Juan": 0
+}`);
 
-/* ====== Login ====== */
-function login(){
-  const user = document.getElementById('userSelect').value;
-  const pin = document.getElementById('pin').value.trim();
-  if(pin === DEFAULT_PIN){
-    currentUser = user;
-    document.getElementById('loginView').style.display = 'none';
-    document.getElementById('appView').style.display = 'block';
-    document.getElementById('userLogged').innerText = currentUser;
-    // set default dates
-    const hoje = new Date().toISOString().slice(0,10);
-    document.getElementById('dataPedido').value = hoje;
-    document.getElementById('filtroData').value = hoje;
-    renderPedidos();
-    document.getElementById('pin').value = '';
-  } else {
-    alert('PIN incorreto. Senha padrão: 1234');
-  }
+function salvarLocal() {
+    localStorage.setItem("pedidosNathy", JSON.stringify(pedidos));
+    localStorage.setItem("totaisVendedoresNathy", JSON.stringify(totaisVendedores));
 }
 
-function logout(){
-  if(!confirm('Sair da conta?')) return;
-  currentUser = null;
-  document.getElementById('appView').style.display = 'none';
-  document.getElementById('loginView').style.display = 'block';
+function login() {
+    const user = document.getElementById("usuario").value;
+    const pass = document.getElementById("senha").value;
+
+    if (pass !== "1234") {
+        alert("Senha incorreta");
+        return;
+    }
+
+    usuarioAtivo = user;
+
+    document.getElementById("login").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    document.getElementById("usuarioLogado").innerText = "Vendedor: " + user;
 }
 
-/* ====== Helpers ====== */
-function save(){
-  localStorage.setItem('pastel_pedidos_v1', JSON.stringify(pedidos));
+function alterarQtd(n) {
+    let qtd = parseInt(document.getElementById("qtd").innerText);
+    qtd += n;
+    if (qtd < 1) qtd = 1;
+    document.getElementById("qtd").innerText = qtd;
 }
 
-function numberToBRL(n){
-  return 'R$ ' + Number(n).toFixed(2);
+function setStatus(s) {
+    statusPedido = s;
 }
 
-/* ====== Form controls ====== */
-let qty = 1;
-let withRefri = false;
-let statusAtual = 'Pendente';
+function registrar() {
+    const data = document.getElementById("data").value;
+    const sabor = document.getElementById("sabor").value;
+    const qtd = parseInt(document.getElementById("qtd").innerText);
+    const refri = parseInt(document.getElementById("refri").value);
+    const obs = document.getElementById("obs").value;
 
-function changeQty(delta){
-  qty = Math.max(1, qty + delta);
-  document.getElementById('qtdDisplay').innerText = qty;
-}
+    const total = (10 + refri) * qtd;
 
-function setRefri(b){
-  withRefri = b;
-  document.getElementById('refiNo').style.opacity = b ? 0.6 : 1;
-  document.getElementById('refiYes').style.opacity = b ? 1 : 0.6;
-}
+    totaisVendedores[usuarioAtivo] += total;
 
-function setStatus(s){
-  statusAtual = s;
-  document.getElementById('stPago').style.opacity = s === 'Pago' ? 1 : 0.7;
-  document.getElementById('stPendente').style.opacity = s === 'Pendente' ? 1 : 0.7;
-}
+    pedidos.push({
+        vendedor: usuarioAtivo,
+        data,
+        sabor,
+        qtd,
+        refri: refri > 0 ? "Sim" : "Não",
+        obs,
+        status: statusPedido,
+        total
+    });
 
-/* ====== Adicionar pedido ====== */
-function addPedido(){
-  const data = document.getElementById('dataPedido').value;
-  const nome = document.getElementById('nomeCliente').value.trim();
-  const sabor = document.getElementById('saborSelect').value;
-  const obs = document.getElementById('obs').value.trim();
+    salvarLocal();
 
-  if(!currentUser){ alert('Faça login'); return; }
-  if(!data || !nome){ alert('Preencha data e nome do cliente'); return; }
-
-  const valorUnit = BASE_PRICE + (withRefri ? REF_PRICE : 0);
-  const valorTotal = valorUnit * qty;
-  const now = new Date();
-  const registro = {
-    id: 'p' + Date.now(),
-    criadoEm: now.toISOString(),
-    data: data,
-    usuario: currentUser,
-    cliente: nome,
-    sabor: sabor,
-    qtd: qty,
-    comRefri: withRefri,
-    valorUnit: valorUnit,
-    valorTotal: valorTotal,
-    status: statusAtual,
-    obs: obs
-  };
-  pedidos.unshift(registro);
-  save();
-  // limpa form
-  document.getElementById('nomeCliente').value = '';
-  document.getElementById('obs').value = '';
-  qty = 1; document.getElementById('qtdDisplay').innerText = 1;
-  setRefri(false); setStatus('Pendente');
-  renderPedidos();
-}
-
-/* ====== Renderizar lista & totais ====== */
-function renderPedidos(){
-  const tbody = document.querySelector('#tabela tbody');
-  tbody.innerHTML = '';
-  const filtro = document.getElementById('filtroData').value;
-  let totalPaid = 0, totalPend = 0, totalGeral = 0, count = 0;
-
-  const list = pedidos.filter(p => {
-    if(!filtro) return true;
-    return p.data === filtro;
-  });
-
-  list.forEach((p, idx) => {
-    count++;
-    const tr = document.createElement('tr');
-    const time = new Date(p.criadoEm).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-    const date = p.data;
-    const statusClass = p.status === 'Pago' ? 'badge-paid' : 'badge-pend';
-    tr.innerHTML = `
-      <td>${date} ${time}</td>
-      <td>${p.cliente}</td>
-      <td>${p.sabor}${p.comRefri ? ' +Ref' : ''}</td>
-      <td>${p.qtd}</td>
-      <td>${numberToBRL(p.valorTotal)}</td>
-      <td class="${statusClass}">${p.status}</td>
-      <td class="actions">
-        <button onclick="toggleStatus('${p.id}')" style="background:#28a745;color:#fff;border-radius:8px;padding:6px 10px">≡</button>
-        <button onclick="delPedido('${p.id}')" class="btn-danger">X</button>
-      </td>
+    document.getElementById("resultado").innerHTML = `
+        <b>Pedido Registrado:</b><br>
+        Vendedor: ${usuarioAtivo}<br>
+        Data: ${data}<br>
+        Sabor: ${sabor}<br>
+        Qtd: ${qtd}<br>
+        Refri: ${refri > 0 ? "Sim" : "Não"}<br>
+        Obs: ${obs}<br>
+        Status: ${statusPedido}<br><br>
+        <b>Total: R$ ${total.toFixed(2)}</b>
     `;
-    tbody.appendChild(tr);
-
-    if(p.status === 'Pago') totalPaid += p.valorTotal;
-    else totalPend += p.valorTotal;
-    totalGeral += p.valorTotal;
-  });
-
-  document.getElementById('totalCount').innerText = count;
-  document.getElementById('totPaid').innerText = numberToBRL(totalPaid);
-  document.getElementById('totPend').innerText = numberToBRL(totalPend);
-  document.getElementById('totGeral').innerText = numberToBRL(totalGeral);
 }
 
-/* ====== Actions: toggle status / delete ====== */
-function toggleStatus(id){
-  const idx = pedidos.findIndex(p => p.id === id);
-  if(idx === -1) return;
-  pedidos[idx].status = pedidos[idx].status === 'Pago' ? 'Pendente' : 'Pago';
-  save();
-  renderPedidos();
+function mostrarHistorico() {
+    let html = "<h3>Histórico de Pedidos</h3>";
+    pedidos.forEach(p => {
+        html += `
+            <div style='margin-bottom:10px;'>
+                <b>${p.data}</b> - ${p.sabor} (${p.qtd}) - R$ ${p.total.toFixed(2)}<br>
+                Vendedor: ${p.vendedor}<br>
+                Refri: ${p.refri} | Status: ${p.status}<br>
+            </div>
+        `;
+    });
+    document.getElementById("historicoDia").innerHTML = html;
 }
 
-function delPedido(id){
-  if(!confirm('Excluir este pedido?')) return;
-  pedidos = pedidos.filter(p => p.id !== id);
-  save();
-  renderPedidos();
+function fecharDia() {
+    let totalGeral = 0;
+    let totalPago = 0;
+    let totalPendente = 0;
+
+    pedidos.forEach(p => {
+        totalGeral += p.total;
+        if (p.status === "Pago") totalPago += p.total;
+        else totalPendente += p.total;
+    });
+
+    let html = `
+        <h3>Fechamento do Dia</h3>
+        Total Geral: R$ ${totalGeral.toFixed(2)}<br>
+        Pago: R$ ${totalPago.toFixed(2)}<br>
+        Pendente: R$ ${totalPendente.toFixed(2)}<br><br>
+
+        <h3>Total por Vendedor</h3>
+        Nathy: R$ ${totaisVendedores["Nathy"].toFixed(2)}<br>
+        Jean: R$ ${totaisVendedores["Jean"].toFixed(2)}<br>
+        Juan: R$ ${totaisVendedores["Juan"].toFixed(2)}<br>
+    `;
+
+    document.getElementById("fechamento").innerHTML = html;
 }
 
-/* ====== Export CSV ====== */
-function exportCSV(){
-  const filtro = document.getElementById('filtroData').value;
-  const rows = pedidos.filter(p => p.data === filtro);
-  if(rows.length === 0){ alert('Nenhum pedido para a data selecionada'); return; }
-
-  const header = ['id','data','horaCriacao','usuario','cliente','sabor','qtd','comRefri','valorUnit','valorTotal','status','obs'];
-  const csv = [header.join(',')];
-  rows.forEach(r => {
-    const time = new Date(r.criadoEm).toISOString();
-    const line = [
-      `"${r.id}"`,
-      `"${r.data}"`,
-      `"${time}"`,
-      `"${r.usuario}"`,
-      `"${r.cliente}"`,
-      `"${r.sabor}"`,
-      r.qtd,
-      r.comRefri ? 1 : 0,
-      r.valorUnit,
-      r.valorTotal,
-      `"${r.status}"`,
-      `"${(r.obs || '').replace(/"/g,'""')}"`
-    ];
-    csv.push(line.join(','));
-  });
-  const blob = new Blob([csv.join('\n')], {type:'text/csv;charset=utf-8;'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `pedidos_${filtro || 'all'}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-/* ====== Fechar Dia: gerar PDF (jsPDF) e opção limpar ====== */
-async function fecharDia(){
-  const filtro = document.getElementById('filtroData').value;
-  if(!filtro){ alert('Selecione a data para fechar'); return; }
-  const rows = pedidos.filter(p => p.data === filtro);
-  if(rows.length === 0){ alert('Nenhum pedido para essa data'); return; }
-
-  // calcular totais
-  let totPaid = 0, totPend = 0, totGeral = 0, qtdTotal = 0, qtdRef = 0;
-  rows.forEach(r=>{
-    if(r.status === 'Pago') totPaid += r.valorTotal;
-    else totPend += r.valorTotal;
-    totGeral += r.valorTotal;
-    qtdTotal += r.qtd;
-    if(r.comRefri) qtdRef += r.qtd;
-  });
-
-  // gerar PDF
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({unit:'pt',format:'a4'});
-  const left = 36;
-  let y = 40;
-  doc.setFontSize(16);
-  doc.text('Pastelaria da Nathy', left, y);
-  y += 22;
-  doc.setFontSize(11);
-  doc.text(`Data: ${filtro}`, left, y); y+=18;
-  doc.text(`Gerado por: ${currentUser}`, left, y); y+=18;
-  doc.text(`Pedidos: ${rows.length} | Qtd pastaís: ${qtdTotal} | Refri: ${qtdRef}`, left, y); y+=20;
-  doc.text(`Total Pago: ${numberToBRL(totPaid)}  |  Total Pendente: ${numberToBRL(totPend)}  |  Geral: ${numberToBRL(totGeral)}`, left, y); y+=22;
-
-  doc.setFontSize(12);
-  doc.text('Detalhes:', left, y); y+=14;
-
-  // tabela simplificada
-  rows.forEach(r=>{
-    const line = `${r.cliente} — ${r.sabor}${r.comRefri ? ' +Ref' : ''} — x${r.qtd} — ${r.status} — ${numberToBRL(r.valorTotal)}`;
-    if(y > 770){ doc.addPage(); y = 40; }
-    doc.text(line, left, y);
-    y += 14;
-  });
-
-  doc.save(`relatorio_pedidos_${filtro}.pdf`);
-
-  // perguntar se quer limpar os pedidos do dia
-  if(confirm('Relatório gerado. Deseja limpar (remover) os pedidos desta data?')){
-    pedidos = pedidos.filter(p => p.data !== filtro);
-    save();
-    renderPedidos();
-    alert('Pedidos da data removidos.');
-  }
-}
-
-/* ====== Util: ir para hoje ====== */
-function hoje(){
-  const hojeStr = new Date().toISOString().slice(0,10);
-  document.getElementById('filtroData').value = hojeStr;
-  renderPedidos();
-}
-
-/* ====== Init defaults ====== */
-(function init(){
-  // pre-seleciona hoje
-  const hojeStr = new Date().toISOString().slice(0,10);
-  document.getElementById('dataPedido').value = hojeStr;
-  document.getElementById('filtroData').value = hojeStr;
-  document.getElementById('qtdDisplay').innerText = '1';
-  setRefri(false);
-  setStatus('Pendente');
-  renderPedidos();
-})();
 </script>
+
 </body>
 </html>
