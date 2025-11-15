@@ -2,279 +2,153 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Pastelaria da Nathy</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registro de Pedidos</title>
 <style>
     body {
         font-family: Arial, sans-serif;
-        background: #ffe4f2;
-        margin: 0;
-        padding: 0;
-        color: #333;
-    }
-
-    .app {
-        max-width: 450px;
-        margin: auto;
+        background: #111;
+        color: #fff;
         padding: 20px;
     }
-
-    h2 {
-        color: #d63384;
-        text-align: center;
+    .card {
+        background: #222;
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 10px;
     }
-
-    input, select, button, textarea {
+    input, select, button {
         width: 100%;
-        padding: 14px;
-        margin: 8px 0;
-        border-radius: 12px;
-        border: 1px solid #ccc;
-        font-size: 18px;
-    }
-
-    button {
-        background: #ff5fa2;
-        color: white;
+        padding: 10px;
+        margin-top: 8px;
+        border-radius: 6px;
         border: none;
+    }
+    button {
+        background: #4CAF50;
+        color: #fff;
         font-weight: bold;
         cursor: pointer;
     }
-
-    button:hover {
-        background: #e64b8a;
-    }
-
-    .hidden { display: none; }
-
-    .pedido {
-        background: white;
-        padding: 12px;
-        border-radius: 12px;
-        margin-bottom: 10px;
-        border-left: 6px solid #ff5fa2;
-    }
-
-    .btn-small {
-        padding: 8px;
-        font-size: 14px;
+    table {
+        width: 100%;
+        margin-top: 20px;
+        background: #222;
         border-radius: 10px;
     }
-
+    table th, table td {
+        padding: 10px;
+        text-align: center;
+        border-bottom: 1px solid #333;
+    }
+    .pago {
+        color: #4CAF50;
+        font-weight: bold;
+    }
+    .pendente {
+        color: #E53935;
+        font-weight: bold;
+    }
 </style>
 </head>
 <body>
 
-<div class="app">
+<h2>📋 Registro de Pedidos</h2>
 
-    <!-- LOGIN -->
-    <div id="login">
-        <h2>Pastelaria da Nathy</h2>
-        <select id="userSelect">
-            <option>Nathy</option>
-            <option>Jean</option>
-            <option>Juan</option>
-        </select>
-        <input type="password" id="senha" placeholder="Senha">
-        <button onclick="login()">Entrar</button>
-    </div>
+<div class="card">
+    <h3>Novo Pedido</h3>
 
-    <!-- MENU -->
-    <div id="menu" class="hidden">
-        <h2 id="userTitle"></h2>
-        <button onclick="showPage('vendas')">Registrar Venda</button>
-        <button onclick="showPage('lista')">Lista de Vendas</button>
-        <button onclick="showPage('fechar')">Fechar Dia</button>
-        <button onclick="backup()">Backup</button>
-        <input type="file" id="restoreFile" onchange="restoreBackup()">
-        <button onclick="logout()">Sair</button>
-    </div>
+    <input id="nome" type="text" placeholder="Nome do cliente">
+    
+    <input id="valor" type="number" placeholder="Valor total">
 
-    <!-- REGISTRAR VENDA -->
-    <div id="vendas" class="hidden">
-        <h2>Nova Venda</h2>
+    <select id="status">
+        <option value="Pago">Pago</option>
+        <option value="Pendente">Pendente</option>
+    </select>
 
-        <input type="date" id="data">
-        
-        <select id="item">
-            <option>Carne com cheddar</option>
-            <option>Frango com cheddar</option>
-            <option>Carne com requeijão</option>
-            <option>Frango com requeijão</option>
-        </select>
-
-        <input type="number" id="qtd" min="1" value="1">
-
-        <label><input type="checkbox" id="refri"> Com refri (+2)</label>
-
-        <textarea id="obs" placeholder="Observações (opcional)"></textarea>
-
-        <label>Status:</label>
-        <button onclick="setPago(true)">Pago</button>
-        <button onclick="setPago(false)">Pendente</button>
-
-        <button onclick="salvarPedido()">Salvar Pedido</button>
-        <button onclick="showPage('menu')">Voltar</button>
-    </div>
-
-    <!-- LISTA -->
-    <div id="lista" class="hidden">
-        <h2>Vendas Registradas</h2>
-        <div id="listaConteudo"></div>
-        <button onclick="showPage('menu')">Voltar</button>
-    </div>
-
-    <!-- FECHAR DIA -->
-    <div id="fechar" class="hidden">
-        <h2>Fechamento</h2>
-        <div id="fecharConteudo"></div>
-        <button onclick="showPage('menu')">Voltar</button>
-    </div>
-
+    <button onclick="adicionarPedido()">Adicionar</button>
 </div>
 
+<h3>Pedidos Registrados</h3>
+
+<table id="tabela">
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Valor</th>
+            <th>Status</th>
+            <th>Excluir</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<div class="card">
+    <h3>Resumo</h3>
+    <p>Total Pago: <b id="totalPago">R$0</b></p>
+    <p>Total Pendente: <b id="totalPendente">R$0</b></p>
+    <p>Total Geral: <b id="totalGeral">R$0</b></p>
+</div>
 
 <script>
-/* ========= BANCO DE DADOS ========= */
-let db = JSON.parse(localStorage.getItem("pastelariaDB") || "[]");
-let pagoStatus = false;
-let usuarioLogado = "";
+    let pedidos = JSON.parse(localStorage.getItem("pedidos")) || [];
 
-/* ========= LOGIN ========= */
-function login() {
-    const senha = document.getElementById("senha").value;
-    if (senha !== "1234") {
-        alert("Senha incorreta!");
-        return;
+    function salvar() {
+        localStorage.setItem("pedidos", JSON.stringify(pedidos));
     }
 
-    usuarioLogado = document.getElementById("userSelect").value;
+    function atualizarTabela() {
+        const tbody = document.querySelector("#tabela tbody");
+        tbody.innerHTML = "";
 
-    document.getElementById("login").classList.add("hidden");
-    document.getElementById("menu").classList.remove("hidden");
+        let pago = 0, pendente = 0;
 
-    document.getElementById("userTitle").innerText =
-        "Vendedor: " + usuarioLogado;
-}
+        pedidos.forEach((p, i) => {
+            let tr = document.createElement("tr");
 
-/* ========= LOGOUT ========= */
-function logout() {
-    location.reload();
-}
+            tr.innerHTML = `
+                <td>${p.nome}</td>
+                <td>R$${p.valor}</td>
+                <td class="${p.status === 'Pago' ? 'pago' : 'pendente'}">${p.status}</td>
+                <td><button style="background:#E53935" onclick="excluir(${i})">X</button></td>
+            `;
 
-/* ========= TROCAR PÁGINAS ========= */
-function showPage(id) {
-    document.querySelectorAll(".app > div").forEach(div => div.classList.add("hidden"));
-    document.getElementById(id).classList.remove("hidden");
+            tbody.appendChild(tr);
 
-    if (id === "lista") renderLista();
-    if (id === "fechar") renderFechamento();
-}
+            if (p.status === "Pago") pago += Number(p.valor);
+            else pendente += Number(p.valor);
+        });
 
-/* ========= STATUS ========= */
-function setPago(v) {
-    pagoStatus = v;
-}
-
-/* ========= SALVAR PEDIDO ========= */
-function salvarPedido() {
-    const pedido = {
-        vendedor: usuarioLogado,
-        data: document.getElementById("data").value,
-        item: document.getElementById("item").value,
-        qtd: Number(document.getElementById("qtd").value),
-        refri: document.getElementById("refri").checked,
-        obs: document.getElementById("obs").value,
-        pago: pagoStatus,
-        valor: 10 * Number(document.getElementById("qtd").value) + (document.getElementById("refri").checked ? 2 : 0)
-    };
-
-    db.push(pedido);
-    localStorage.setItem("pastelariaDB", JSON.stringify(db));
-
-    alert("Venda registrada!");
-    showPage("menu");
-}
-
-/* ========= LISTA ========= */
-function renderLista() {
-    const div = document.getElementById("listaConteudo");
-    div.innerHTML = "";
-
-    db.forEach((p, i) => {
-        div.innerHTML += `
-            <div class="pedido">
-                <b>${p.item}</b> — R$ ${p.valor}<br>
-                Qtd: ${p.qtd} | Data: ${p.data}<br>
-                Refri: ${p.refri ? "Sim" : "Não"}<br>
-                Status: ${p.pago ? "Pago" : "Pendente"}<br>
-                Vendedor: ${p.vendedor}<br>
-                Obs: ${p.obs || "(nenhuma)"}<br><br>
-                <button class="btn-small" onclick="editar(${i})">Editar</button>
-            </div>
-        `;
-    });
-}
-
-/* ========= EDITAR ========= */
-function editar(i) {
-    const p = db[i];
-
-    document.getElementById("data").value = p.data;
-    document.getElementById("item").value = p.item;
-    document.getElementById("qtd").value = p.qtd;
-    document.getElementById("refri").checked = p.refri;
-    document.getElementById("obs").value = p.obs;
-    pagoStatus = p.pago;
-
-    db.splice(i, 1);
-    localStorage.setItem("pastelariaDB", JSON.stringify(db));
-
-    showPage("vendas");
-}
-
-/* ========= FECHAMENTO ========= */
-function renderFechamento() {
-    let vendedores = {};
-
-    db.forEach(p => {
-        if (!vendedores[p.vendedor]) vendedores[p.vendedor] = 0;
-        vendedores[p.vendedor] += p.valor;
-    });
-
-    let html = "";
-    for (let v in vendedores) {
-        html += `<b>${v}</b>: R$ ${vendedores[v]}<br>`;
+        document.getElementById("totalPago").innerText = "R$" + pago;
+        document.getElementById("totalPendente").innerText = "R$" + pendente;
+        document.getElementById("totalGeral").innerText = "R$" + (pago + pendente);
     }
 
-    document.getElementById("fecharConteudo").innerHTML = html;
-}
+    function adicionarPedido() {
+        const nome = document.getElementById("nome").value;
+        const valor = document.getElementById("valor").value;
+        const status = document.getElementById("status").value;
 
-/* ========= BACKUP ========= */
-function backup() {
-    const blob = new Blob([JSON.stringify(db)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
+        if (!nome || !valor) {
+            alert("Preencha nome e valor!");
+            return;
+        }
 
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "pastelaria_backup.json";
-    a.click();
-}
+        pedidos.push({ nome, valor, status });
+        salvar();
+        atualizarTabela();
 
-/* ========= RESTAURAR BACKUP ========= */
-function restoreBackup() {
-    const file = document.getElementById("restoreFile").files[0];
-    const reader = new FileReader();
+        document.getElementById("nome").value = "";
+        document.getElementById("valor").value = "";
+    }
 
-    reader.onload = e => {
-        db = JSON.parse(e.target.result);
-        localStorage.setItem("pastelariaDB", JSON.stringify(db));
-        alert("Backup restaurado!");
-    };
+    function excluir(i) {
+        pedidos.splice(i, 1);
+        salvar();
+        atualizarTabela();
+    }
 
-    reader.readAsText(file);
-}
-
+    atualizarTabela();
 </script>
 
 </body>
