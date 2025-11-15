@@ -5,274 +5,287 @@
 <title>Pastelaria da Nathy</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-    body {
-        font-family: Arial, sans-serif;
-        background: #ffe4f2;
-        margin: 0;
-        padding: 0;
-        color: #333;
-    }
 
-    .app {
-        max-width: 450px;
-        margin: auto;
-        padding: 20px;
-    }
+body {
+    font-family: Arial, sans-serif;
+    background: #ffe4f0;
+    margin: 0;
+    padding: 0;
+}
 
-    h2 {
-        color: #d63384;
-        text-align: center;
-    }
+.container {
+    max-width: 500px;
+    margin: auto;
+    padding: 20px;
+}
 
-    input, select, button, textarea {
-        width: 100%;
-        padding: 14px;
-        margin: 8px 0;
-        border-radius: 12px;
-        border: 1px solid #ccc;
-        font-size: 18px;
-    }
+h1, h2 {
+    text-align: center;
+    color: #d63384;
+}
 
-    button {
-        background: #ff5fa2;
-        color: white;
-        border: none;
-        font-weight: bold;
-        cursor: pointer;
-    }
+input, select, button, textarea {
+    width: 100%;
+    padding: 14px;
+    margin: 8px 0;
+    border-radius: 10px;
+    border: 1px solid #ffb3d9;
+    font-size: 18px;
+}
 
-    button:hover {
-        background: #e64b8a;
-    }
+button {
+    background: #d63384;
+    color: white;
+    font-weight: bold;
+    border: none;
+}
 
-    .hidden { display: none; }
+button:hover { opacity: 0.8; }
 
-    .pedido {
-        background: white;
-        padding: 12px;
-        border-radius: 12px;
-        margin-bottom: 10px;
-        border-left: 6px solid #ff5fa2;
-    }
+.btn-small {
+    padding: 6px;
+    font-size: 14px;
+    margin-top: 5px;
+}
 
-    .btn-small {
-        padding: 8px;
-        font-size: 14px;
-        border-radius: 10px;
-    }
+#app, #vendas, #fechamento { display: none; }
+
+.pedido {
+    background: white;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    border-left: 6px solid #d63384;
+}
 
 </style>
 </head>
 <body>
 
-<div class="app">
+<div class="container">
 
-    <!-- LOGIN -->
-    <div id="login">
-        <h2>Pastelaria da Nathy</h2>
-        <select id="userSelect">
-            <option>Nathy</option>
-            <option>Jean</option>
-            <option>Juan</option>
-        </select>
-        <input type="password" id="senha" placeholder="Senha">
-        <button onclick="login()">Entrar</button>
-    </div>
+<!-- LOGIN -->
+<div id="login">
+    <h1>Pastelaria da Nathy</h1>
+    <h2>Login</h2>
 
-    <!-- MENU -->
-    <div id="menu" class="hidden">
-        <h2 id="userTitle"></h2>
-        <button onclick="showPage('vendas')">Registrar Venda</button>
-        <button onclick="showPage('lista')">Lista de Vendas</button>
-        <button onclick="showPage('fechar')">Fechar Dia</button>
-        <button onclick="backup()">Backup</button>
-        <input type="file" id="restoreFile" onchange="restoreBackup()">
-        <button onclick="logout()">Sair</button>
-    </div>
+    <select id="userSelect">
+        <option>Nathy</option>
+        <option>Jean</option>
+        <option>Juan</option>
+    </select>
 
-    <!-- REGISTRAR VENDA -->
-    <div id="vendas" class="hidden">
-        <h2>Nova Venda</h2>
+    <input type="password" id="senha" placeholder="Senha">
 
-        <input type="date" id="data">
-        
-        <select id="item">
-            <option>Carne com cheddar</option>
-            <option>Frango com cheddar</option>
-            <option>Carne com requeijão</option>
-            <option>Frango com requeijão</option>
-        </select>
+    <button onclick="entrar()">Entrar</button>
+</div>
 
-        <input type="number" id="qtd" min="1" value="1">
+<!-- APP -->
+<div id="app">
+    <h1 id="userTitle"></h1>
 
-        <label><input type="checkbox" id="refri"> Com refri (+2)</label>
+    <button onclick="mostrarVendas()">Registrar Venda</button>
+    <button onclick="mostrarLista()">Lista de Vendas</button>
+    <button onclick="mostrarFechamento()">Fechar Dia</button>
+    <button onclick="baixarBackup()">Backup</button>
+</div>
 
-        <textarea id="obs" placeholder="Observações (opcional)"></textarea>
+<!-- REGISTRAR VENDA -->
+<div id="vendas">
+    <h2>Nova Venda</h2>
 
-        <label>Status:</label>
-        <button onclick="setPago(true)">Pago</button>
-        <button onclick="setPago(false)">Pendente</button>
+    <input type="date" id="data">
 
-        <button onclick="salvarPedido()">Salvar Pedido</button>
-        <button onclick="showPage('menu')">Voltar</button>
-    </div>
+    <input type="text" id="cliente" placeholder="Nome do cliente">
 
-    <!-- LISTA -->
-    <div id="lista" class="hidden">
-        <h2>Vendas Registradas</h2>
-        <div id="listaConteudo"></div>
-        <button onclick="showPage('menu')">Voltar</button>
-    </div>
+    <select id="item">
+        <option>Carne com cheddar</option>
+        <option>Frango com cheddar</option>
+        <option>Carne com requeijão</option>
+        <option>Frango com requeijão</option>
+    </select>
 
-    <!-- FECHAR DIA -->
-    <div id="fechar" class="hidden">
-        <h2>Fechamento</h2>
-        <div id="fecharConteudo"></div>
-        <button onclick="showPage('menu')">Voltar</button>
-    </div>
+    <input type="number" id="qtd" value="1" min="1">
+
+    <label><input type="checkbox" id="refri"> Com Refri (+2)</label>
+
+    <textarea id="obs" placeholder="Observações"></textarea>
+
+    <label><input type="checkbox" id="pago"> Pago</label>
+
+    <button onclick="salvarPedido()">Salvar Pedido</button>
+    <button onclick="voltar()">Voltar</button>
+</div>
+
+<!-- LISTA -->
+<div id="lista"></div>
+
+<!-- FECHAMENTO -->
+<div id="fechamento">
+    <h2>Fechamento do Dia</h2>
+    <input type="date" id="dataFechar">
+    <button onclick="gerarFechamento()">Gerar</button>
+    <div id="resultadoFechamento"></div>
+    <button onclick="voltar()">Voltar</button>
+</div>
 
 </div>
 
-
 <script>
-/* ========= BANCO DE DADOS ========= */
-let db = JSON.parse(localStorage.getItem("pastelariaDB") || "[]");
-let pagoStatus = false;
+
+// BANCO DE DADOS
+function carregarDB() {
+    let db = localStorage.getItem("pastelariaDB");
+    if (!db) {
+        db = { senha: "1234", pedidos: [] };
+        localStorage.setItem("pastelariaDB", JSON.stringify(db));
+    }
+    return JSON.parse(db);
+}
+
+function salvarDB(db) {
+    localStorage.setItem("pastelariaDB", JSON.stringify(db));
+}
+
 let usuarioLogado = "";
 
-/* ========= LOGIN ========= */
-function login() {
+// LOGIN
+function entrar() {
+    const db = carregarDB();
     const senha = document.getElementById("senha").value;
-    if (senha !== "1234") {
+
+    if (senha !== db.senha) {
         alert("Senha incorreta!");
         return;
     }
 
     usuarioLogado = document.getElementById("userSelect").value;
-
-    document.getElementById("login").classList.add("hidden");
-    document.getElementById("menu").classList.remove("hidden");
-
-    document.getElementById("userTitle").innerText =
-        "Vendedor: " + usuarioLogado;
+    document.getElementById("login").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    document.getElementById("userTitle").innerText = "Bem-vindo, " + usuarioLogado;
 }
 
-/* ========= LOGOUT ========= */
-function logout() {
-    location.reload();
+function mostrarVendas() {
+    document.getElementById("app").style.display = "none";
+    document.getElementById("vendas").style.display = "block";
 }
 
-/* ========= TROCAR PÁGINAS ========= */
-function showPage(id) {
-    document.querySelectorAll(".app > div").forEach(div => div.classList.add("hidden"));
-    document.getElementById(id).classList.remove("hidden");
+function mostrarLista() {
+    const db = carregarDB();
+    let html = "<h2>Vendas</h2>";
 
-    if (id === "lista") renderLista();
-    if (id === "fechar") renderFechamento();
-}
-
-/* ========= STATUS ========= */
-function setPago(v) {
-    pagoStatus = v;
-}
-
-/* ========= SALVAR PEDIDO ========= */
-function salvarPedido() {
-    const pedido = {
-        vendedor: usuarioLogado,
-        data: document.getElementById("data").value,
-        item: document.getElementById("item").value,
-        qtd: Number(document.getElementById("qtd").value),
-        refri: document.getElementById("refri").checked,
-        obs: document.getElementById("obs").value,
-        pago: pagoStatus,
-        valor: 10 * Number(document.getElementById("qtd").value) + (document.getElementById("refri").checked ? 2 : 0)
-    };
-
-    db.push(pedido);
-    localStorage.setItem("pastelariaDB", JSON.stringify(db));
-
-    alert("Venda registrada!");
-    showPage("menu");
-}
-
-/* ========= LISTA ========= */
-function renderLista() {
-    const div = document.getElementById("listaConteudo");
-    div.innerHTML = "";
-
-    db.forEach((p, i) => {
-        div.innerHTML += `
-            <div class="pedido">
-                <b>${p.item}</b> — R$ ${p.valor}<br>
-                Qtd: ${p.qtd} | Data: ${p.data}<br>
-                Refri: ${p.refri ? "Sim" : "Não"}<br>
-                Status: ${p.pago ? "Pago" : "Pendente"}<br>
-                Vendedor: ${p.vendedor}<br>
-                Obs: ${p.obs || "(nenhuma)"}<br><br>
-                <button class="btn-small" onclick="editar(${i})">Editar</button>
-            </div>
-        `;
+    db.pedidos.forEach((p, i) => {
+        html += `
+        <div class="pedido">
+            <b>${p.item}</b> — R$ ${p.valor}<br>
+            Cliente: ${p.cliente}<br>
+            Qtd: ${p.qtd}<br>
+            Refri: ${p.refri ? "Sim" : "Não"}<br>
+            Pago: ${p.pago ? "Sim" : "Não"}<br>
+            Vendedor: ${p.vendedor}<br>
+            Obs: ${p.obs || "(nenhuma)"}<br>
+            <button class="btn-small" onclick="editar(${i})">Editar</button>
+        </div>`;
     });
+
+    html += `<button onclick="voltar()">Voltar</button>`;
+    document.getElementById("lista").innerHTML = html;
+    document.getElementById("lista").style.display = "block";
+    document.getElementById("app").style.display = "none";
 }
 
-/* ========= EDITAR ========= */
+// SALVAR
+function salvarPedido() {
+    const db = carregarDB();
+
+    const qtd = Number(document.getElementById("qtd").value);
+    const refri = document.getElementById("refri").checked;
+    const valor = 10 * qtd + (refri ? 2 : 0);
+
+    db.pedidos.push({
+        data: document.getElementById("data").value,
+        cliente: document.getElementById("cliente").value,
+        item: document.getElementById("item").value,
+        qtd,
+        refri,
+        obs: document.getElementById("obs").value,
+        pago: document.getElementById("pago").checked,
+        valor,
+        vendedor: usuarioLogado
+    });
+
+    salvarDB(db);
+    alert("Pedido salvo!");
+    voltar();
+}
+
+// EDITAR
 function editar(i) {
-    const p = db[i];
+    const db = carregarDB();
+    const p = db.pedidos[i];
 
     document.getElementById("data").value = p.data;
+    document.getElementById("cliente").value = p.cliente;
     document.getElementById("item").value = p.item;
     document.getElementById("qtd").value = p.qtd;
     document.getElementById("refri").checked = p.refri;
     document.getElementById("obs").value = p.obs;
-    pagoStatus = p.pago;
+    document.getElementById("pago").checked = p.pago;
 
-    db.splice(i, 1);
-    localStorage.setItem("pastelariaDB", JSON.stringify(db));
+    db.pedidos.splice(i, 1);
+    salvarDB(db);
 
-    showPage("vendas");
+    mostrarVendas();
 }
 
-/* ========= FECHAMENTO ========= */
-function renderFechamento() {
-    let vendedores = {};
+// FECHAR DIA
+function mostrarFechamento() {
+    document.getElementById("app").style.display = "none";
+    document.getElementById("fechamento").style.display = "block";
+}
 
-    db.forEach(p => {
-        if (!vendedores[p.vendedor]) vendedores[p.vendedor] = 0;
-        vendedores[p.vendedor] += p.valor;
+function gerarFechamento() {
+    const db = carregarDB();
+    const data = document.getElementById("dataFechar").value;
+
+    const filtrados = db.pedidos.filter(p => p.data === data);
+
+    let total = 0;
+    let porVendedor = {};
+
+    filtrados.forEach(p => {
+        total += p.valor;
+        if (!porVendedor[p.vendedor]) porVendedor[p.vendedor] = 0;
+        porVendedor[p.vendedor] += p.valor;
     });
 
-    let html = "";
-    for (let v in vendedores) {
-        html += `<b>${v}</b>: R$ ${vendedores[v]}<br>`;
+    let html = "<h3>Total: R$ " + total + "</h3>";
+
+    html += "<h3>Por Vendedor:</h3>";
+    for (let nome in porVendedor) {
+        html += `${nome}: R$ ${porVendedor[nome]}<br>`;
     }
 
-    document.getElementById("fecharConteudo").innerHTML = html;
+    document.getElementById("resultadoFechamento").innerHTML = html;
 }
 
-/* ========= BACKUP ========= */
-function backup() {
+// BACKUP
+function baixarBackup() {
+    const db = carregarDB();
     const blob = new Blob([JSON.stringify(db)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
 
     const a = document.createElement("a");
     a.href = url;
-    a.download = "pastelaria_backup.json";
+    a.download = "backup_pastelaria.json";
     a.click();
 }
 
-/* ========= RESTAURAR BACKUP ========= */
-function restoreBackup() {
-    const file = document.getElementById("restoreFile").files[0];
-    const reader = new FileReader();
-
-    reader.onload = e => {
-        db = JSON.parse(e.target.result);
-        localStorage.setItem("pastelariaDB", JSON.stringify(db));
-        alert("Backup restaurado!");
-    };
-
-    reader.readAsText(file);
+function voltar() {
+    document.getElementById("vendas").style.display = "none";
+    document.getElementById("lista").style.display = "none";
+    document.getElementById("fechamento").style.display = "none";
+    document.getElementById("app").style.display = "block";
 }
 
 </script>
