@@ -1,500 +1,360 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Pastelaria da Nathy - App</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Pastelaria da Nathy — Vendas</title>
 
-<!-- jsPDF CDN para gerar PDF -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- Supabase client -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
   :root{
-    --bg:#ffe6f2;
-    --pink:#ff4da6;
-    --pink-2:#ff82c4;
-    --accent:#d63384;
-    --card:#fff;
-    --text:#222;
-    --success:#28a745;
-    --warn:#e6005c;
-    max-width:450px;
+    --bg:#fff0f6; --card:#fff; --accent:#d63384; --btn:#ff4da6; --muted:#666;
   }
-  html,body{height:100%}
-  body{
-    margin:0;
-    font-family:Inter,Arial,Helvetica,sans-serif;
-    background:var(--bg);
-    color:var(--text);
-    -webkit-font-smoothing:antialiased;
-    padding:12px;
-    display:flex;
-    justify-content:center;
+  body{margin:0;font-family:Inter,Arial,Helvetica,sans-serif;background:var(--bg);-webkit-font-smoothing:antialiased;}
+  .app{max-width:520px;margin:0 auto;padding:14px}
+  h1{text-align:center;color:var(--accent);margin:6px 0 12px;font-size:22px}
+  .card{background:var(--card);border-radius:12px;padding:12px;margin-bottom:12px;box-shadow:0 6px 18px rgba(214,51,132,0.06)}
+  label{display:block;font-weight:700;margin:8px 0 6px;font-size:14px}
+  input[type="text"],input[type="number"],select,textarea,input[type="date"]{
+    width:100%;padding:12px;border-radius:10px;border:1px solid #ffd6eb;font-size:16px;box-sizing:border-box;
   }
-  .app{
-    width:100%;
-    max-width:450px;
-  }
-  h1{
-    text-align:center;
-    color:var(--accent);
-    margin:6px 0 14px;
-    font-size:26px;
-  }
-  .card{
-    background:var(--card);
-    border-radius:14px;
-    padding:14px;
-    box-shadow:0 6px 18px rgba(214,51,132,0.12);
-    margin-bottom:14px;
-  }
-  label{display:block;font-weight:700;margin:8px 0 6px;font-size:16px}
-  input[type="text"], input[type="password"], select, textarea, input[type="date"]{
-    width:100%;
-    padding:12px;
-    border-radius:10px;
-    border:1px solid #ffd6eb;
-    font-size:18px;
-    box-sizing:border-box;
-  }
-  textarea{min-height:72px;resize:none}
+  textarea{min-height:64px;resize:none}
   .row{display:flex;gap:8px}
   .col{flex:1}
-  button{
-    cursor:pointer;
-    border:0;
-    border-radius:12px;
-    padding:12px;
-    font-weight:700;
-    font-size:18px;
-    color:#fff;
-    background:var(--pink);
-  }
-  .btn-round{
-    width:56px;height:56px;border-radius:50%;padding:0;font-size:26px;background:var(--pink-2);
-  }
-  .status-row{display:flex;gap:8px;margin-top:10px}
-  .status-btn{flex:1;padding:12px;border-radius:10px;font-size:18px;color:#fff}
-  .status-btn.pago{background:var(--success)}
-  .status-btn.pendente{background:var(--warn)}
-  .small{font-size:14px;color:#666;margin-top:6px}
-  table{width:100%;border-collapse:collapse;margin-top:10px;font-size:16px}
-  th{background:#ffd6eb;padding:10px;text-align:left}
-  td{background:#fff;padding:10px;border-bottom:1px solid #ffeaf2}
-  .badge-paid{color:var(--success);font-weight:800}
-  .badge-pend{color:var(--warn);font-weight:800}
-  .actions button{margin-right:6px;padding:8px 10px;border-radius:8px;font-weight:700}
-  .btn-danger{background:#e6005c;color:#fff;border:0}
-  .btn-secondary{background:#ffb3d9;color:#fff;border:0}
-  .totals{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-  .totals .box{flex:1;padding:10px;border-radius:10px;background:#fff;text-align:center;font-weight:700}
-  .link{color:var(--accent);font-weight:700;text-decoration:underline;cursor:pointer}
-  .small-muted{font-size:13px;color:#666}
-  footer{margin:20px 0 40px;text-align:center;color:#777;font-size:13px}
-  /* ensure mobile tappable sizes */
-  @media (max-width:420px){
-    button, .status-btn{font-size:18px;padding:12px}
-  }
+  .btn{background:var(--btn);color:#fff;border:0;padding:12px;border-radius:12px;font-weight:800;font-size:16px;cursor:pointer}
+  .btn.secondary{background:#ffb3d9;color:#fff}
+  .btn.ghost{background:transparent;border:2px solid #ffd6eb;color:var(--accent)}
+  .small{font-size:13px;color:var(--muted)}
+  table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px}
+  th,td{padding:8px;border-bottom:1px solid #fff2f7;text-align:left}
+  th{background:#ffd6eb;color:#fff}
+  .actions button{margin-right:6px;padding:6px 8px;border-radius:8px;border:0;cursor:pointer}
+  .edit{background:#28a745;color:#fff}
+  .del{background:#c8234f;color:#fff}
+  .totals{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .box{flex:1;background:#fff;padding:10px;border-radius:10px;text-align:center;font-weight:800}
+  .vendorTotals{margin-top:8px}
+  .filterRow{display:flex;gap:8px;align-items:center;margin-top:6px}
+  @media (max-width:420px){ .row, .filterRow{flex-direction:column} .btn{font-size:18px} input,select{font-size:18px;padding:14px} }
 </style>
 </head>
 <body>
   <div class="app">
     <h1>Pastelaria da Nathy</h1>
 
-    <!-- LOGIN -->
-    <div id="loginView" class="card">
-      <label>Entrar como</label>
-      <select id="userSelect" aria-label="Usuário">
-        <option value="Nathy">Nathy</option>
-        <option value="Jean">Jean</option>
-        <option value="Juan">Juan</option>
+    <!-- Form (add/edit) -->
+    <div class="card" id="formCard">
+      <label>Data</label>
+      <input type="date" id="inputDate">
+
+      <label>Vendedor</label>
+      <select id="inputVendedor">
+        <option>Nathy</option>
+        <option>Jean</option>
+        <option>Juan</option>
       </select>
 
-      <label>Senha (padrão)</label>
-      <input id="pin" type="password" placeholder="Digite o PIN (ex: 1234)">
+      <label>Cliente</label>
+      <input type="text" id="inputCliente" placeholder="Digite o nome do cliente">
 
-      <div style="margin-top:12px" class="row">
-        <div class="col"><button onclick="login()">Entrar</button></div>
+      <label>Item</label>
+      <select id="inputItem">
+        <option>Carne com Cheddar</option>
+        <option>Frango com Cheddar</option>
+        <option>Carne com Requeijão</option>
+        <option>Frango com Requeijão</option>
+      </select>
+
+      <div class="row" style="margin-top:6px">
+        <div class="col">
+          <label>Quantidade</label>
+          <input type="number" id="inputQtd" min="1" value="1">
+        </div>
+        <div class="col">
+          <label>Com refri?</label>
+          <select id="inputRefri">
+            <option value="0">Não</option>
+            <option value="1">Sim (+R$2)</option>
+          </select>
+        </div>
       </div>
 
-      <p class="small">Senha padrão: <b>1234</b>. Depois dá pra trocar no código se quiser.</p>
+      <label style="margin-top:6px">Pago?</label>
+      <select id="inputPago">
+        <option value="1">Sim</option>
+        <option value="0">Não</option>
+      </select>
+
+      <label>Observação</label>
+      <textarea id="inputObs" placeholder="Ex: sem cebola"></textarea>
+
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn" id="saveBtn">Adicionar</button>
+        <button class="btn secondary" id="clearBtn">Limpar</button>
+      </div>
+
+      <input type="hidden" id="editId" value="">
+      <p class="small" style="margin-top:8px">Pastel R$10, Refri +R$2</p>
     </div>
 
-    <!-- APP -->
-    <div id="appView" style="display:none">
-      <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div>
-            <div class="small-muted">Logado como</div>
-            <div style="font-weight:800" id="userLogged"></div>
-          </div>
-          <div>
-            <button class="btn-secondary" onclick="logout()">Sair</button>
-          </div>
+    <!-- Filters + actions -->
+    <div class="card">
+      <div class="filterRow">
+        <div style="flex:1">
+          <label>Filtrar por data</label>
+          <input type="date" id="filterDate">
+        </div>
+
+        <div style="width:150px">
+          <label>Vendedor</label>
+          <select id="filterVendor">
+            <option value="">Todos</option>
+            <option>Nathy</option>
+            <option>Jean</option>
+            <option>Juan</option>
+          </select>
         </div>
       </div>
 
-      <!-- Formulário de pedido -->
-      <div class="card">
-        <label>Data</label>
-        <input type="date" id="dataPedido">
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn" onclick="loadSales()">Atualizar</button>
+        <button class="btn ghost" onclick="exportCSV()">Exportar CSV</button>
+      </div>
+    </div>
 
-        <label>Cliente</label>
-        <input type="text" id="nomeCliente" placeholder="Nome do cliente">
+    <!-- Table + totals -->
+    <div class="card">
+      <h3 style="margin:0 0 8px 0">Vendas</h3>
+      <div id="tableWrap"></div>
 
-        <label>Sabor</label>
-        <select id="saborSelect">
-          <option>Carne com Cheddar</option>
-          <option>Frango com Cheddar</option>
-          <option>Carne com Requeijão</option>
-          <option>Frango com Requeijão</option>
-        </select>
+      <div class="totals">
+        <div class="box">Recebido<br><span id="totalPaid">R$ 0,00</span></div>
+        <div class="box">Pendentes<br><span id="totalPending">R$ 0,00</span></div>
+        <div class="box">Geral<br><span id="totalAll">R$ 0,00</span></div>
+      </div>
 
-        <label>Quantidade</label>
-        <div style="display:flex;align-items:center;gap:10px;margin-top:8px">
-          <button class="btn-round" onclick="changeQty(-1)">−</button>
-          <div id="qtdDisplay" style="font-weight:800;font-size:22px;width:50px;text-align:center">1</div>
-          <button class="btn-round" onclick="changeQty(1)">+</button>
-          <div style="flex:1"></div>
-          <div style="text-align:right" class="small-muted">Pastel R$10 | Refri R$2</div>
-        </div>
-
-        <label style="margin-top:12px">Com Refri?</label>
+      <div class="vendorTotals card" style="margin-top:10px;background:transparent;padding:0">
         <div style="display:flex;gap:8px">
-          <button id="refiNo" class="status-btn pendente" style="flex:1" onclick="setRefri(false)">Não</button>
-          <button id="refiYes" class="status-btn pago" style="flex:1;background:#ff4da6" onclick="setRefri(true)">Sim (+R$2)</button>
-        </div>
-
-        <label>Observação</label>
-        <textarea id="obs" placeholder="Ex: sem requeijão, assado, entrega..."></textarea>
-
-        <label>Status</label>
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <button id="stPago" class="status-btn pago" onclick="setStatus('Pago')">Pago</button>
-          <button id="stPendente" class="status-btn pendente" onclick="setStatus('Pendente')">Pendente</button>
-        </div>
-
-        <div style="margin-top:12px">
-          <button onclick="addPedido()">➕ Registrar Pedido</button>
+          <div style="flex:1;background:#fff;padding:8px;border-radius:10px">Nathy: <span id="vtNathy">R$ 0,00</span></div>
+          <div style="flex:1;background:#fff;padding:8px;border-radius:10px">Jean: <span id="vtJean">R$ 0,00</span></div>
+          <div style="flex:1;background:#fff;padding:8px;border-radius:10px">Juan: <span id="vtJuan">R$ 0,00</span></div>
         </div>
       </div>
-
-      <!-- filtros e ações -->
-      <div class="card" style="padding-bottom:12px">
-        <div style="display:flex;gap:8px;align-items:center">
-          <div style="flex:1">
-            <label>Ver pedidos da data</label>
-            <input type="date" id="filtroData" onchange="renderPedidos()">
-          </div>
-          <div style="width:110px">
-            <label style="visibility:hidden">_</label>
-            <button class="btn-secondary" onclick="hoje()">Hoje</button>
-          </div>
-        </div>
-
-        <div style="display:flex;gap:8px;margin-top:10px">
-          <button class="btn-secondary" onclick="exportCSV()">Exportar CSV</button>
-          <button onclick="fecharDia()">Fechar Dia (PDF)</button>
-        </div>
-
-        <div class="small" style="margin-top:8px">Obs: Fechar Dia gera relatório em PDF e permite limpar os pedidos daquele dia.</div>
-      </div>
-
-      <!-- lista -->
-      <div class="card" id="listaCard">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div><strong>Pedidos</strong></div>
-          <div class="small-muted">Total pedidos: <span id="totalCount">0</span></div>
-        </div>
-
-        <table id="tabela">
-          <thead>
-            <tr><th>Hora/Data</th><th>Cliente</th><th>Item</th><th>Qtd</th><th>R$</th><th>Status</th><th></th></tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-
-        <div class="totals" style="margin-top:12px">
-          <div class="box">Pagos: <div id="totPaid">R$0</div></div>
-          <div class="box">Pendentes: <div id="totPend">R$0</div></div>
-          <div class="box">Geral: <div id="totGeral">R$0</div></div>
-        </div>
-      </div>
-
-      <footer>App offline — dados salvos no celular (LocalStorage)</footer>
     </div>
+
   </div>
 
 <script>
-/* ====== Config iniciais ====== */
-const USERS = ['Nathy','Jean','Juan'];
-const DEFAULT_PIN = '1234';
-const BASE_PRICE = 10;
-const REF_PRICE = 2;
+/* ------------- CONFIG SUPABASE ------------- */
+/* Seus dados (já configurados) */
+const SUPABASE_URL = "https://kvdlwnlviedisywdykty.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt2ZGx3bmx2aWVkaXN5d2R5a3R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxNjQ4MDcsImV4cCI6MjA3ODc0MDgwN30.pWBQRyjFIWbnDzX0tQhAuyYUwEfmyK6HPm5jzUlpp3Q";
+const supabase = supabaseJs.createClient ? supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// compatibility for different cdn names
 
-let currentUser = null;
-let pedidos = JSON.parse(localStorage.getItem('pastel_pedidos_v1') || '[]');
+/* ------------- UTIL ------------- */
+function formatBRL(n){ return 'R$ ' + Number(n || 0).toFixed(2).replace('.',','); }
+function q(sel){ return document.querySelector(sel) }
+function todayISO(){ return new Date().toISOString().slice(0,10) }
 
-/* ====== Login ====== */
-function login(){
-  const user = document.getElementById('userSelect').value;
-  const pin = document.getElementById('pin').value.trim();
-  if(pin === DEFAULT_PIN){
-    currentUser = user;
-    document.getElementById('loginView').style.display = 'none';
-    document.getElementById('appView').style.display = 'block';
-    document.getElementById('userLogged').innerText = currentUser;
-    // set default dates
-    const hoje = new Date().toISOString().slice(0,10);
-    document.getElementById('dataPedido').value = hoje;
-    document.getElementById('filtroData').value = hoje;
-    renderPedidos();
-    document.getElementById('pin').value = '';
+/* ------------- INIT UI ------------- */
+q('#filterDate').value = todayISO();
+q('#inputDate').value = todayISO();
+
+/* ------------- ADD / UPDATE ------------- */
+q('#saveBtn').addEventListener('click', async ()=>{
+  const id = q('#editId').value;
+  const vendedor = q('#inputVendedor').value;
+  const cliente = q('#inputCliente').value.trim();
+  const item = q('#inputItem').value;
+  const quantidade = Math.max(1, parseInt(q('#inputQtd').value) || 1);
+  const com_refri = q('#inputRefri').value === '1';
+  const pago = q('#inputPago').value === '1';
+  const obs = q('#inputObs').value.trim();
+  const valor = (10 * quantidade) + (com_refri ? 2 : 0);
+
+  if(!cliente){ alert('Preencha o nome do cliente'); return; }
+
+  if(id){
+    // update
+    const { error } = await supabase.from('vendas').update({
+      vendedor, cliente, item, quantidade, com_refri, pago, valor, obs
+    }).eq('id', id);
+    if(error){ alert('Erro ao atualizar: ' + error.message); return; }
+    q('#editId').value = '';
+    q('#saveBtn').innerText = 'Adicionar';
   } else {
-    alert('PIN incorreto. Senha padrão: 1234');
+    // insert
+    const { error } = await supabase.from('vendas').insert([{
+      vendedor, cliente, item, quantidade, com_refri, pago, valor
+    }]);
+    if(error){ alert('Erro ao salvar: ' + error.message); return; }
   }
+
+  clearForm();
+  await loadSales();
+});
+
+/* clear button */
+q('#clearBtn').addEventListener('click', clearForm);
+function clearForm(){
+  q('#inputCliente').value = '';
+  q('#inputQtd').value = '1';
+  q('#inputRefri').value = '0';
+  q('#inputPago').value = '1';
+  q('#inputObs').value = '';
+  q('#editId').value = '';
+  q('#saveBtn').innerText = 'Adicionar';
+  q('#inputDate').value = todayISO();
 }
 
-function logout(){
-  if(!confirm('Sair da conta?')) return;
-  currentUser = null;
-  document.getElementById('appView').style.display = 'none';
-  document.getElementById('loginView').style.display = 'block';
+/* ------------- LOAD / RENDER ------------- */
+async function loadSales(){
+  const date = q('#filterDate').value;
+  const vendor = q('#filterVendor').value;
+
+  // build query: filter by date (compare date part of timestamp)
+  let query = supabase.from('vendas').select('*').order('data', { ascending: false });
+  // filter by date: use range from date 00:00 to date 23:59:59
+  if(date){
+    const from = new Date(date + 'T00:00:00').toISOString();
+    const to = new Date(date + 'T23:59:59').toISOString();
+    query = query.gte('data', from).lte('data', to);
+  }
+  if(vendor) query = query.eq('vendedor', vendor);
+
+  const { data, error } = await query;
+  if(error){ console.error(error); alert('Erro ao carregar vendas: ' + error.message); return; }
+
+  renderTable(data || []);
+  renderTotals(data || []);
 }
 
-/* ====== Helpers ====== */
-function save(){
-  localStorage.setItem('pastel_pedidos_v1', JSON.stringify(pedidos));
-}
-
-function numberToBRL(n){
-  return 'R$ ' + Number(n).toFixed(2);
-}
-
-/* ====== Form controls ====== */
-let qty = 1;
-let withRefri = false;
-let statusAtual = 'Pendente';
-
-function changeQty(delta){
-  qty = Math.max(1, qty + delta);
-  document.getElementById('qtdDisplay').innerText = qty;
-}
-
-function setRefri(b){
-  withRefri = b;
-  document.getElementById('refiNo').style.opacity = b ? 0.6 : 1;
-  document.getElementById('refiYes').style.opacity = b ? 1 : 0.6;
-}
-
-function setStatus(s){
-  statusAtual = s;
-  document.getElementById('stPago').style.opacity = s === 'Pago' ? 1 : 0.7;
-  document.getElementById('stPendente').style.opacity = s === 'Pendente' ? 1 : 0.7;
-}
-
-/* ====== Adicionar pedido ====== */
-function addPedido(){
-  const data = document.getElementById('dataPedido').value;
-  const nome = document.getElementById('nomeCliente').value.trim();
-  const sabor = document.getElementById('saborSelect').value;
-  const obs = document.getElementById('obs').value.trim();
-
-  if(!currentUser){ alert('Faça login'); return; }
-  if(!data || !nome){ alert('Preencha data e nome do cliente'); return; }
-
-  const valorUnit = BASE_PRICE + (withRefri ? REF_PRICE : 0);
-  const valorTotal = valorUnit * qty;
-  const now = new Date();
-  const registro = {
-    id: 'p' + Date.now(),
-    criadoEm: now.toISOString(),
-    data: data,
-    usuario: currentUser,
-    cliente: nome,
-    sabor: sabor,
-    qtd: qty,
-    comRefri: withRefri,
-    valorUnit: valorUnit,
-    valorTotal: valorTotal,
-    status: statusAtual,
-    obs: obs
-  };
-  pedidos.unshift(registro);
-  save();
-  // limpa form
-  document.getElementById('nomeCliente').value = '';
-  document.getElementById('obs').value = '';
-  qty = 1; document.getElementById('qtdDisplay').innerText = 1;
-  setRefri(false); setStatus('Pendente');
-  renderPedidos();
-}
-
-/* ====== Renderizar lista & totais ====== */
-function renderPedidos(){
-  const tbody = document.querySelector('#tabela tbody');
-  tbody.innerHTML = '';
-  const filtro = document.getElementById('filtroData').value;
-  let totalPaid = 0, totalPend = 0, totalGeral = 0, count = 0;
-
-  const list = pedidos.filter(p => {
-    if(!filtro) return true;
-    return p.data === filtro;
-  });
-
-  list.forEach((p, idx) => {
-    count++;
-    const tr = document.createElement('tr');
-    const time = new Date(p.criadoEm).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-    const date = p.data;
-    const statusClass = p.status === 'Pago' ? 'badge-paid' : 'badge-pend';
-    tr.innerHTML = `
-      <td>${date} ${time}</td>
-      <td>${p.cliente}</td>
-      <td>${p.sabor}${p.comRefri ? ' +Ref' : ''}</td>
-      <td>${p.qtd}</td>
-      <td>${numberToBRL(p.valorTotal)}</td>
-      <td class="${statusClass}">${p.status}</td>
-      <td class="actions">
-        <button onclick="toggleStatus('${p.id}')" style="background:#28a745;color:#fff;border-radius:8px;padding:6px 10px">≡</button>
-        <button onclick="delPedido('${p.id}')" class="btn-danger">X</button>
+function renderTable(rows){
+  if(!rows) rows = [];
+  let html = `<table><thead><tr>
+    <th>Hora</th><th>Vendedor</th><th>Cliente</th><th>Item</th><th>Qtd</th><th>Refri</th><th>Pago</th><th>Valor</th><th></th>
+  </tr></thead><tbody>`;
+  rows.forEach(r=>{
+    const time = new Date(r.data).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    html += `<tr>
+      <td>${time}</td>
+      <td>${escapeHtml(r.vendedor)}</td>
+      <td>${escapeHtml(r.cliente)}</td>
+      <td>${escapeHtml(r.item)}</td>
+      <td style="text-align:center">${r.quantidade}</td>
+      <td style="text-align:center">${r.com_refri ? 'Sim' : 'Não'}</td>
+      <td style="text-align:center">${r.pago ? 'Sim' : 'Não'}</td>
+      <td style="text-align:right">${formatBRL(r.valor)}</td>
+      <td style="text-align:center" class="actions">
+        <button class="edit" onclick="startEdit('${r.id}')">Editar</button>
+        <button class="del" onclick="deleteSale('${r.id}')">Excluir</button>
       </td>
-    `;
-    tbody.appendChild(tr);
+    </tr>`;
+  });
+  html += `</tbody></table>`;
+  q('#tableWrap').innerHTML = html;
+}
 
-    if(p.status === 'Pago') totalPaid += p.valorTotal;
-    else totalPend += p.valorTotal;
-    totalGeral += p.valorTotal;
+/* ------------- TOTALS ------------- */
+function renderTotals(rows){
+  let totPaid=0, totPend=0, totAll=0;
+  const perVendor = { Nathy:0, Jean:0, Juan:0 };
+
+  rows.forEach(r=>{
+    const v = Number(r.valor || 0);
+    totAll += v;
+    if(r.pago) totPaid += v; else totPend += v;
+    if(perVendor[r.vendedor]===undefined) perVendor[r.vendedor]=0;
+    perVendor[r.vendedor] += v;
   });
 
-  document.getElementById('totalCount').innerText = count;
-  document.getElementById('totPaid').innerText = numberToBRL(totalPaid);
-  document.getElementById('totPend').innerText = numberToBRL(totalPend);
-  document.getElementById('totGeral').innerText = numberToBRL(totalGeral);
+  q('#totalPaid').innerText = formatBRL(totPaid);
+  q('#totalPending').innerText = formatBRL(totPend);
+  q('#totalAll').innerText = formatBRL(totAll);
+
+  q('#vtNathy').innerText = formatBRL(perVendor.Nathy || 0);
+  q('#vtJean').innerText = formatBRL(perVendor.Jean || 0);
+  q('#vtJuan').innerText = formatBRL(perVendor.Juan || 0);
 }
 
-/* ====== Actions: toggle status / delete ====== */
-function toggleStatus(id){
-  const idx = pedidos.findIndex(p => p.id === id);
-  if(idx === -1) return;
-  pedidos[idx].status = pedidos[idx].status === 'Pago' ? 'Pendente' : 'Pago';
-  save();
-  renderPedidos();
+/* ------------- EDIT / DELETE ------------- */
+async function startEdit(id){
+  // load single
+  const { data, error } = await supabase.from('vendas').select('*').eq('id', id).single();
+  if(error){ alert('Erro ao buscar venda: ' + error.message); return; }
+  const r = data;
+  q('#inputDate').value = (new Date(r.data)).toISOString().slice(0,10);
+  q('#inputVendedor').value = r.vendedor;
+  q('#inputCliente').value = r.cliente;
+  q('#inputItem').value = r.item;
+  q('#inputQtd').value = r.quantidade;
+  q('#inputRefri').value = r.com_refri ? '1' : '0';
+  q('#inputPago').value = r.pago ? '1' : '0';
+  q('#inputObs').value = r.obs || '';
+  q('#editId').value = r.id;
+  q('#saveBtn').innerText = 'Salvar alteração';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function delPedido(id){
-  if(!confirm('Excluir este pedido?')) return;
-  pedidos = pedidos.filter(p => p.id !== id);
-  save();
-  renderPedidos();
+async function deleteSale(id){
+  if(!confirm('Excluir essa venda?')) return;
+  const { error } = await supabase.from('vendas').delete().eq('id', id);
+  if(error){ alert('Erro ao excluir: ' + error.message); return; }
+  await loadSales();
 }
 
-/* ====== Export CSV ====== */
-function exportCSV(){
-  const filtro = document.getElementById('filtroData').value;
-  const rows = pedidos.filter(p => p.data === filtro);
-  if(rows.length === 0){ alert('Nenhum pedido para a data selecionada'); return; }
+/* ------------- EXPORT CSV ------------- */
+async function exportCSV(){
+  // export currently filtered rows
+  const date = q('#filterDate').value;
+  const vendor = q('#filterVendor').value;
+  let query = supabase.from('vendas').select('*').order('data',{ascending:false});
+  if(date){
+    const from = new Date(date + 'T00:00:00').toISOString();
+    const to = new Date(date + 'T23:59:59').toISOString();
+    query = query.gte('data', from).lte('data', to);
+  }
+  if(vendor) query = query.eq('vendedor', vendor);
+  const { data, error } = await query;
+  if(error){ alert('Erro ao exportar: '+error.message); return; }
+  if(!data || data.length===0){ alert('Nenhum registro para exportar'); return; }
 
-  const header = ['id','data','horaCriacao','usuario','cliente','sabor','qtd','comRefri','valorUnit','valorTotal','status','obs'];
-  const csv = [header.join(',')];
-  rows.forEach(r => {
-    const time = new Date(r.criadoEm).toISOString();
+  const header = ['id','data','vendedor','cliente','item','quantidade','com_refri','pago','valor','obs'];
+  const lines = [header.join(',')];
+  data.forEach(r=>{
     const line = [
       `"${r.id}"`,
       `"${r.data}"`,
-      `"${time}"`,
-      `"${r.usuario}"`,
-      `"${r.cliente}"`,
-      `"${r.sabor}"`,
-      r.qtd,
-      r.comRefri ? 1 : 0,
-      r.valorUnit,
-      r.valorTotal,
-      `"${r.status}"`,
-      `"${(r.obs || '').replace(/"/g,'""')}"`
+      `"${(r.vendedor||'').replace(/"/g,'""')}"`,
+      `"${(r.cliente||'').replace(/"/g,'""')}"`,
+      `"${(r.item||'').replace(/"/g,'""')}"`,
+      r.quantidade,
+      r.com_refri ? 1 : 0,
+      r.pago ? 1 : 0,
+      r.valor,
+      `"${(r.obs||'').replace(/"/g,'""')}"`
     ];
-    csv.push(line.join(','));
+    lines.push(line.join(','));
   });
-  const blob = new Blob([csv.join('\n')], {type:'text/csv;charset=utf-8;'});
+  const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `pedidos_${filtro || 'all'}.csv`;
+  a.download = `vendas_${date || 'all'}.csv`;
   a.click();
   URL.revokeObjectURL(url);
 }
 
-/* ====== Fechar Dia: gerar PDF (jsPDF) e opção limpar ====== */
-async function fecharDia(){
-  const filtro = document.getElementById('filtroData').value;
-  if(!filtro){ alert('Selecione a data para fechar'); return; }
-  const rows = pedidos.filter(p => p.data === filtro);
-  if(rows.length === 0){ alert('Nenhum pedido para essa data'); return; }
+/* ------------- helpers ------------- */
+function escapeHtml(s){ if(!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-  // calcular totais
-  let totPaid = 0, totPend = 0, totGeral = 0, qtdTotal = 0, qtdRef = 0;
-  rows.forEach(r=>{
-    if(r.status === 'Pago') totPaid += r.valorTotal;
-    else totPend += r.valorTotal;
-    totGeral += r.valorTotal;
-    qtdTotal += r.qtd;
-    if(r.comRefri) qtdRef += r.qtd;
-  });
+/* ------------- start ------------- */
+window.loadSales = loadSales;
+document.addEventListener('DOMContentLoaded', ()=>{ loadSales(); });
 
-  // gerar PDF
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({unit:'pt',format:'a4'});
-  const left = 36;
-  let y = 40;
-  doc.setFontSize(16);
-  doc.text('Pastelaria da Nathy', left, y);
-  y += 22;
-  doc.setFontSize(11);
-  doc.text(`Data: ${filtro}`, left, y); y+=18;
-  doc.text(`Gerado por: ${currentUser}`, left, y); y+=18;
-  doc.text(`Pedidos: ${rows.length} | Qtd pastaís: ${qtdTotal} | Refri: ${qtdRef}`, left, y); y+=20;
-  doc.text(`Total Pago: ${numberToBRL(totPaid)}  |  Total Pendente: ${numberToBRL(totPend)}  |  Geral: ${numberToBRL(totGeral)}`, left, y); y+=22;
-
-  doc.setFontSize(12);
-  doc.text('Detalhes:', left, y); y+=14;
-
-  // tabela simplificada
-  rows.forEach(r=>{
-    const line = `${r.cliente} — ${r.sabor}${r.comRefri ? ' +Ref' : ''} — x${r.qtd} — ${r.status} — ${numberToBRL(r.valorTotal)}`;
-    if(y > 770){ doc.addPage(); y = 40; }
-    doc.text(line, left, y);
-    y += 14;
-  });
-
-  doc.save(`relatorio_pedidos_${filtro}.pdf`);
-
-  // perguntar se quer limpar os pedidos do dia
-  if(confirm('Relatório gerado. Deseja limpar (remover) os pedidos desta data?')){
-    pedidos = pedidos.filter(p => p.data !== filtro);
-    save();
-    renderPedidos();
-    alert('Pedidos da data removidos.');
-  }
-}
-
-/* ====== Util: ir para hoje ====== */
-function hoje(){
-  const hojeStr = new Date().toISOString().slice(0,10);
-  document.getElementById('filtroData').value = hojeStr;
-  renderPedidos();
-}
-
-/* ====== Init defaults ====== */
-(function init(){
-  // pre-seleciona hoje
-  const hojeStr = new Date().toISOString().slice(0,10);
-  document.getElementById('dataPedido').value = hojeStr;
-  document.getElementById('filtroData').value = hojeStr;
-  document.getElementById('qtdDisplay').innerText = '1';
-  setRefri(false);
-  setStatus('Pendente');
-  renderPedidos();
-})();
 </script>
 </body>
 </html>
