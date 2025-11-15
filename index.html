@@ -1,438 +1,120 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Pastelaria da Nathy — Sistema</title>
-
-<!-- Supabase -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<!-- jsPDF (opcional para PDF) -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-<style>
-:root{
-  --bg:#fff0f6; --card:#fff; --accent:#d63384; --btn:#ff4da6; --muted:#666;
-}
-*{box-sizing:border-box}
-body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);-webkit-font-smoothing:antialiased}
-.app{max-width:720px;margin:0 auto;padding:16px}
-.header{display:flex;justify-content:space-between;align-items:center;gap:12px}
-h1{color:var(--accent);margin:0;font-size:20px}
-.card{background:var(--card);border-radius:12px;padding:12px;margin:12px 0;box-shadow:0 6px 18px rgba(214,51,132,0.06)}
-label{display:block;font-weight:700;margin:8px 0 6px;font-size:14px}
-input[type="text"],input[type="email"],input[type="password"],input[type="number"],select,textarea,input[type="date"]{
-  width:100%;padding:10px;border-radius:10px;border:1px solid #ffd6eb;font-size:16px;margin-bottom:6px;
-}
-textarea{min-height:72px}
-.row{display:flex;gap:8px}
-.col{flex:1}
-.btn{background:var(--btn);color:#fff;border:0;padding:10px;border-radius:10px;font-weight:800;cursor:pointer}
-.btn.secondary{background:#ffb3d9}
-.btn.ghost{background:transparent;border:2px solid #ffd6eb;color:var(--accent)}
-.small{font-size:13px;color:var(--muted)}
-.table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px}
-.table th{background:#ffd6eb;color:#fff;padding:8px;text-align:left}
-.table td{background:#fff;padding:8px;border-bottom:1px solid #fff2f7}
-.actions button{margin-right:6px;padding:6px 8px;border-radius:8px;border:0;cursor:pointer}
-.edit{background:#28a745;color:#fff}
-.del{background:#c8234f;color:#fff}
-.totals{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
-.box{flex:1;background:#fff;padding:10px;border-radius:10px;text-align:center;font-weight:800}
-.footer{font-size:13px;color:#666;text-align:center;margin-top:12px}
-@media (max-width:520px){ .row{flex-direction:column} input, select {font-size:18px;padding:12px} .btn{font-size:18px;padding:12px} }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pastelaria da Nathy — Vendas</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #fff0f6; color: #333; }
+    h1 { color: #d63384; }
+    label { display: block; margin-top: 12px; font-weight: bold; }
+    input, select, button, textarea { width: 100%; padding: 10px; margin-top: 4px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
+    button { background-color: #ff4da6; color: white; border: none; cursor: pointer; margin-top: 12px; }
+    button:hover { opacity: 0.9; }
+    .msg { margin-top: 15px; font-size: 16px; }
+  </style>
 </head>
 <body>
-  <div class="app">
 
-    <div class="header">
-      <h1>Pastelaria da Nathy</h1>
-      <div>
-        <button class="btn ghost" id="btnToAuth">Auth</button>
-        <button class="btn ghost" id="btnToApp">App</button>
-      </div>
-    </div>
+  <h1>Registrar Venda - Pastelaria da Nathy</h1>
 
-    <!-- ===== AUTH CARD ===== -->
-    <div id="authCard" class="card">
-      <h3>Autenticação (Supabase Auth)</h3>
+  <label>Data</label>
+  <input type="date" id="data" />
 
-      <label>Email</label>
-      <input id="authEmail" type="email" placeholder="seu@email.com">
+  <label>Vendedor</label>
+  <select id="vendedor">
+    <option>Nathy</option>
+    <option>Jean</option>
+    <option>Juan</option>
+  </select>
 
-      <label>Senha</label>
-      <input id="authPass" type="password" placeholder="min 6 caracteres">
+  <label>Cliente</label>
+  <input type="text" id="cliente" placeholder="Nome do cliente" />
 
-      <div class="row">
-        <button class="btn" id="btnSignUp">Criar conta</button>
-        <button class="btn secondary" id="btnSignIn">Entrar</button>
-      </div>
+  <label>Item</label>
+  <select id="item">
+    <option>Carne com Cheddar</option>
+    <option>Frango com Cheddar</option>
+    <option>Carne com Requeijão</option>
+    <option>Frango com Requeijão</option>
+  </select>
 
-      <p class="small">Se preferir usar PIN local: use o botão "Entrar sem conta" abaixo.</p>
-      <div class="row">
-        <button class="btn ghost" id="btnGuest">Entrar sem conta (PIN)</button>
-        <input id="guestPin" placeholder="PIN (ex: 1234)" style="width:150px">
-      </div>
+  <label>Quantidade</label>
+  <input type="number" id="quantidade" min="1" value="1" />
 
-      <div id="authMessage" class="small" style="margin-top:8px;color:#555"></div>
-    </div>
+  <label>Com refri? (+ R$2)</label>
+  <select id="com_refri">
+    <option value="0">Não</option>
+    <option value="1">Sim</option>
+  </select>
 
-    <!-- ===== MAIN APP ===== -->
-    <div id="mainApp" style="display:none">
-      <!-- FORM -->
-      <div class="card" id="formCard">
-        <label>Data</label>
-        <input type="date" id="data" />
+  <label>Pago?</label>
+  <select id="pago">
+    <option value="1">Sim</option>
+    <option value="0">Não</option>
+  </select>
 
-        <label>Vendedor</label>
-        <select id="vendedor">
-          <option>Nathy</option>
-          <option>Jean</option>
-          <option>Juan</option>
-        </select>
+  <button onclick="salvarVenda()">Salvar Venda</button>
 
-        <label>Cliente</label>
-        <input id="cliente" placeholder="Nome do cliente (digite)">
-
-        <label>Item</label>
-        <select id="item">
-          <option>Carne com Cheddar</option>
-          <option>Frango com Cheddar</option>
-          <option>Carne com Requeijão</option>
-          <option>Frango com Requeijão</option>
-        </select>
-
-        <div class="row">
-          <div class="col">
-            <label>Quantidade</label>
-            <input type="number" id="quantidade" min="1" value="1">
-          </div>
-          <div class="col">
-            <label>Com refri?</label>
-            <select id="com_refri"><option value="0">Não</option><option value="1">Sim (+R$2)</option></select>
-          </div>
-        </div>
-
-        <label>Pago?</label>
-        <select id="pago"><option value="1">Sim</option><option value="0">Não</option></select>
-
-        <label>Observação</label>
-        <textarea id="obs" placeholder="Ex: sem cebola"></textarea>
-
-        <div class="row" style="margin-top:8px">
-          <button class="btn" id="btnSave">Adicionar</button>
-          <button class="btn secondary" id="btnClear">Limpar</button>
-        </div>
-
-        <input type="hidden" id="editId" value="">
-        <p class="small">Pastel R$10 • Refri R$2</p>
-      </div>
-
-      <!-- FILTERS -->
-      <div class="card">
-        <div class="row">
-          <div class="col">
-            <label>Filtrar data</label>
-            <input type="date" id="filterDate">
-          </div>
-          <div style="width:160px">
-            <label>Vendedor</label>
-            <select id="filterVendor">
-              <option value="">Todos</option>
-              <option>Nathy</option>
-              <option>Jean</option>
-              <option>Juan</option>
-            </select>
-          </div>
-        </div>
-
-        <div style="display:flex;gap:8px;margin-top:8px">
-          <button class="btn" id="btnReload">Atualizar</button>
-          <button class="btn ghost" id="btnCSV">Exportar CSV</button>
-          <button class="btn ghost" id="btnPDF">Gerar PDF</button>
-          <button class="btn ghost" id="btnSignOut">Sair</button>
-        </div>
-      </div>
-
-      <!-- TABLE + totals -->
-      <div class="card">
-        <h3 style="margin:0 0 8px 0">Vendas</h3>
-        <div id="tableWrap"></div>
-
-        <div class="totals">
-          <div class="box">Recebido<br><span id="totalPaid">R$ 0,00</span></div>
-          <div class="box">Pendentes<br><span id="totalPending">R$ 0,00</span></div>
-          <div class="box">Geral<br><span id="totalAll">R$ 0,00</span></div>
-        </div>
-
-        <div style="margin-top:10px;display:flex;gap:8px">
-          <div style="flex:1;background:#fff;padding:8px;border-radius:10px">Nathy: <span id="vtNathy">R$0,00</span></div>
-          <div style="flex:1;background:#fff;padding:8px;border-radius:10px">Jean: <span id="vtJean">R$0,00</span></div>
-          <div style="flex:1;background:#fff;padding:8px;border-radius:10px">Juan: <span id="vtJuan">R$0,00</span></div>
-        </div>
-      </div>
-    </div>
-
-    <p class="footer">Feito pra você — me diz se quer mudanças rápidas no layout.</p>
-  </div>
+  <div class="msg" id="mensagem"></div>
 
 <script>
-/* ================= CONFIG SUPABASE ================= */
-const SUPABASE_URL = "https://kvdlwnlviedisywdykty.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt2ZGx3bmx2aWVkaXN5d2R5a3R5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxNjQ4MDcsImV4cCI6MjA3ODc0MDgwN30.pWBQRyjFIWbnDzX0tQhAuyYUwEfmyK6HPm5jzUlpp3Q";
-const supabase = supabaseJs.createClient ? supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  // URL do seu novo Web App
+  const ENDPOINT = "https://script.google.com/macros/s/AKfycbzDmAT8O3KCvinmLdSHxZzcOaetKcH_TimqcoPxoEBejl4LiqUPq2Hrj_Stf2sLRBI/exec";
 
-/* ========== HELPERS ========== */
-const $ = s=>document.querySelector(s);
-const formatBRL = n=> 'R$ ' + Number(n||0).toFixed(2).replace('.',',');
-const todayISO = ()=> new Date().toISOString().slice(0,10);
-function escapeHtml(s){ if(!s) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  async function salvarVenda() {
+    const data = document.getElementById("data").value;
+    const vendedor = document.getElementById("vendedor").value;
+    const cliente = document.getElementById("cliente").value.trim();
+    const item = document.getElementById("item").value;
+    const quantidade = parseInt(document.getElementById("quantidade").value);
+    const com_refri = document.getElementById("com_refri").value === "1";
+    const pago = document.getElementById("pago").value === "1";
+    const valor_total = (10 * quantidade) + (com_refri ? 2 : 0);
 
-/* ========== INIT UI ========== */
-$('#filterDate').value = todayISO();
-$('#data').value = todayISO();
-$('#btnToAuth').addEventListener('click', ()=>{ $('#authCard').scrollIntoView({behavior:'smooth'}) });
-$('#btnToApp').addEventListener('click', ()=>{ $('#mainApp').scrollIntoView({behavior:'smooth'}) });
+    if (!cliente) {
+      document.getElementById("mensagem").innerText = "Por favor, preencha o nome do cliente.";
+      return;
+    }
 
-/* ========== AUTH ========== */
-$('#btnSignUp').addEventListener('click', async ()=>{
-  const email = $('#authEmail').value.trim();
-  const pass = $('#authPass').value.trim();
-  if(!email || !pass){ $('#authMessage').innerText = 'Preencha email e senha'; return; }
-  const { data, error } = await supabase.auth.signUp({ email, password: pass });
-  if(error){ $('#authMessage').innerText = 'Erro: ' + error.message; return; }
-  $('#authMessage').innerText = 'Conta criada. Verifique seu e-mail.';
-});
+    const body = {
+      data,
+      vendedor,
+      cliente,
+      item,
+      quantidade,
+      com_refri,
+      pago,
+      valor_total
+    };
 
-$('#btnSignIn').addEventListener('click', async ()=>{
-  const email = $('#authEmail').value.trim();
-  const pass = $('#authPass').value.trim();
-  if(!email || !pass){ $('#authMessage').innerText = 'Preencha email e senha'; return; }
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
-  if(error){ $('#authMessage').innerText = 'Erro: ' + error.message; return; }
-  $('#authMessage').innerText = 'Logado: ' + (data.user?.email || '');
-  enterApp(); 
-});
-
-$('#btnGuest').addEventListener('click', ()=>{
-  const pin = $('#guestPin').value.trim();
-  if(pin === '' ) { alert('Insira PIN'); return; }
-  if(pin === '1234'){
-    // guest login via PIN - show app
-    enterApp(true);
-  } else alert('PIN incorreto');
-});
-
-/* sign out */
-$('#btnSignOut').addEventListener('click', async ()=>{
-  await supabase.auth.signOut();
-  location.reload();
-});
-
-/* enter app after auth */
-function enterApp(guest=false){
-  $('#authCard').style.display = 'none';
-  $('#mainApp').style.display = 'block';
-  // if logged in from Supabase, set default vendedor to email localname
-  if(!guest){
-    const user = supabase.auth.getUser ? null : null; // not necessary
-    // we won't auto-set vendedor from auth — user selects
+    try {
+      const resp = await fetch(ENDPOINT, {
+        method: "POST",
+        body: JSON.stringify(body)
+      });
+      const json = await resp.json();
+      if (json.status === "sucesso") {
+        document.getElementById("mensagem").innerText = "Venda registrada com sucesso!";
+        limparForm();
+      } else {
+        document.getElementById("mensagem").innerText = "Erro ao registrar: " + JSON.stringify(json);
+      }
+    } catch (e) {
+      document.getElementById("mensagem").innerText = "Erro de rede: " + e.message;
+    }
   }
-  loadSales();
-}
 
-/* ========== CRUD pedidos ========== */
-$('#btnSave').addEventListener('click', async ()=>{
-  const id = $('#editId').value || null;
-  const dataVal = $('#data').value || todayISO();
-  const vendedor = $('#vendedor').value;
-  const cliente = $('#cliente').value.trim();
-  const item = $('#item').value;
-  const quantidade = Math.max(1, parseInt($('#quantidade').value) || 1);
-  const com_refri = $('#com_refri').value === '1';
-  const pago = $('#pago').value === '1';
-  const obs = $('#obs').value.trim();
-  const valor = (10 * quantidade) + (com_refri ? 2 : 0);
-
-  if(!cliente){ alert('Preencha o nome do cliente'); return; }
-
-  if(id){
-    const { error } = await supabase.from('pedidos').update({
-      data: dataVal, vendedor, cliente, item, quantidade, com_refri, pago, obs, valor
-    }).eq('id', id);
-    if(error){ alert('Erro ao atualizar: ' + error.message); return; }
-    $('#editId').value = '';
-    $('#btnSave').innerText = 'Adicionar';
-  } else {
-    const { error } = await supabase.from('pedidos').insert([{
-      data: dataVal, vendedor, cliente, item, quantidade, com_refri, pago, obs, valor
-    }]);
-    if(error){ alert('Erro ao salvar: ' + error.message); return; }
+  function limparForm() {
+    document.getElementById("cliente").value = "";
+    document.getElementById("quantidade").value = "1";
+    document.getElementById("com_refri").value = "0";
+    document.getElementById("pago").value = "0";
   }
-  clearForm();
-  await loadSales();
-});
 
-$('#btnClear').addEventListener('click', clearForm);
-function clearForm(){
-  $('#cliente').value = '';
-  $('#quantidade').value = '1';
-  $('#com_refri').value = '0';
-  $('#pago').value = '1';
-  $('#obs').value = '';
-  $('#editId').value = '';
-  $('#btnSave').innerText = 'Adicionar';
-  $('#data').value = todayISO();
-}
-
-/* ========== LOAD / RENDER ========== */
-$('#btnReload').addEventListener('click', loadSales);
-$('#filterDate').addEventListener('change', loadSales);
-$('#filterVendor').addEventListener('change', loadSales);
-$('#btnCSV').addEventListener('click', exportCSV);
-$('#btnPDF').addEventListener('click', generatePDF);
-
-async function loadSales(){
-  const date = $('#filterDate').value;
-  const vendor = $('#filterVendor').value;
-
-  let q = supabase.from('pedidos').select('*').order('criado_em',{ascending:false});
-  if(date) q = q.eq('data', date);
-  if(vendor) q = q.eq('vendedor', vendor);
-
-  const { data, error } = await q;
-  if(error){ console.error(error); alert('Erro ao carregar: ' + error.message); return; }
-  renderTable(data || []);
-  renderTotals(data || []);
-}
-
-function renderTable(rows){
-  let html = `<table class="table"><thead><tr>
-    <th>Hora</th><th>Vendedor</th><th>Cliente</th><th>Item</th><th>Qtd</th><th>Refri</th><th>Pago</th><th style="text-align:right">Valor</th><th></th>
-  </tr></thead><tbody>`;
-  (rows||[]).forEach(r=>{
-    const time = r.criado_em ? new Date(r.criado_em).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) : '';
-    html += `<tr>
-      <td>${time}</td>
-      <td>${escapeHtml(r.vendedor)}</td>
-      <td>${escapeHtml(r.cliente)}</td>
-      <td>${escapeHtml(r.item)}</td>
-      <td style="text-align:center">${r.quantidade}</td>
-      <td style="text-align:center">${r.com_refri? 'Sim':'Não'}</td>
-      <td style="text-align:center">${r.pago? 'Sim':'Não'}</td>
-      <td style="text-align:right">${formatBRL(r.valor)}</td>
-      <td style="text-align:center">
-        <button class="edit" onclick="startEdit('${r.id}')">Editar</button>
-        <button class="del" onclick="deleteSale('${r.id}')">Excluir</button>
-      </td>
-    </tr>`;
-  });
-  html += `</tbody></table>`;
-  $('#tableWrap').innerHTML = html;
-}
-
-function renderTotals(rows){
-  let paid=0, pend=0, all=0;
-  const per = { Nathy:0, Jean:0, Juan:0 };
-  (rows||[]).forEach(r=>{
-    const v = Number(r.valor||0);
-    all += v;
-    if(r.pago) paid += v; else pend += v;
-    per[r.vendedor] = (per[r.vendedor]||0) + v;
-  });
-  $('#totalPaid').innerText = formatBRL(paid);
-  $('#totalPending').innerText = formatBRL(pend);
-  $('#totalAll').innerText = formatBRL(all);
-  $('#vtNathy').innerText = formatBRL(per.Nathy||0);
-  $('#vtJean').innerText = formatBRL(per.Jean||0);
-  $('#vtJuan').innerText = formatBRL(per.Juan||0);
-}
-
-/* ========== EDIT / DELETE ========== */
-async function startEdit(id){
-  const { data, error } = await supabase.from('pedidos').select('*').eq('id', id).single();
-  if(error){ alert('Erro ao buscar registro: ' + error.message); return; }
-  const r = data;
-  $('#data').value = r.data || todayISO();
-  $('#vendedor').value = r.vendedor || '';
-  $('#cliente').value = r.cliente || '';
-  $('#item').value = r.item || '';
-  $('#quantidade').value = r.quantidade || 1;
-  $('#com_refri').value = r.com_refri ? '1' : '0';
-  $('#pago').value = r.pago ? '1' : '0';
-  $('#obs').value = r.obs || '';
-  $('#editId').value = r.id;
-  $('#btnSave').innerText = 'Salvar alteração';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-async function deleteSale(id){
-  if(!confirm('Excluir essa venda?')) return;
-  const { error } = await supabase.from('pedidos').delete().eq('id', id);
-  if(error){ alert('Erro ao excluir: ' + error.message); return; }
-  await loadSales();
-}
-
-/* ========== EXPORT CSV / PDF ========== */
-async function exportCSV(){
-  const date = $('#filterDate').value;
-  const vendor = $('#filterVendor').value;
-  let q = supabase.from('pedidos').select('*').order('criado_em',{ascending:false});
-  if(date) q = q.eq('data', date);
-  if(vendor) q = q.eq('vendedor', vendor);
-  const { data, error } = await q;
-  if(error){ alert('Erro: ' + error.message); return; }
-  if(!data || data.length===0){ alert('Nenhum registro para exportar'); return; }
-  const header = ['id','data','vendedor','cliente','item','quantidade','com_refri','pago','valor','obs'];
-  const lines = [header.join(',')];
-  data.forEach(r=>{
-    const line = [
-      `"${r.id}"`, `"${r.data}"`, `"${(r.vendedor||'').replace(/"/g,'""')}"`,
-      `"${(r.cliente||'').replace(/"/g,'""')}"`, `"${(r.item||'').replace(/"/g,'""')}"`,
-      r.quantidade, r.com_refri?1:0, r.pago?1:0, r.valor, `"${(r.obs||'').replace(/"/g,'""')}"`
-    ];
-    lines.push(line.join(','));
-  });
-  const blob = new Blob([lines.join('\n')], { type:'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href = url; a.download = `vendas_${$('#filterDate').value || 'all'}.csv`; a.click(); URL.revokeObjectURL(url);
-}
-
-function generatePDF(){
-  // basic PDF: list filtered rows
-  (async ()=>{
-    const { jsPDF } = window.jspdf || window.jspdf;
-    if(!jsPDF){ alert('jsPDF não carregado'); return; }
-    const date = $('#filterDate').value;
-    let q = supabase.from('pedidos').select('*').order('criado_em',{ascending:false});
-    if(date) q = q.eq('data', date);
-    const { data, error } = await q;
-    if(error){ alert('Erro: ' + error.message); return; }
-    const doc = new jsPDF();
-    let y = 20;
-    doc.setFontSize(14); doc.text('Fechamento - Pastelaria da Nathy', 14, y); y+=8;
-    doc.setFontSize(10);
-    data.forEach((r, i)=>{
-      const line = `${i+1}) ${r.vendedor} – ${r.cliente} – ${r.item} x${r.quantidade} – ${r.pago?'Pago':'Pend'} – R$ ${Number(r.valor).toFixed(2)}`;
-      if(y > 270){ doc.addPage(); y = 20; }
-      doc.text(line, 14, y); y+=6;
-    });
-    doc.save(`fechamento_${date || 'all'}.pdf`);
-  })();
-}
-
-/* ========== START ========== */
-document.addEventListener('DOMContentLoaded', ()=>{
-  // default filter date = today
-  $('#filterDate').value = todayISO();
-  $('#data').value = todayISO();
-  // try to detect logged user (optional)
-  // loadSales(); // do only after enterApp/auth
-});
-
-/* ================= END ================= */
+  // Define data padrão como hoje
+  document.getElementById("data").value = new Date().toISOString().slice(0,10);
 </script>
+
 </body>
 </html>
