@@ -1,302 +1,278 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
 <title>Pastelaria da Nathy</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
     body {
-        font-family: Arial;
-        background: #ffe5f2;
-        padding: 20px;
+        font-family: Arial, sans-serif;
+        background: #ffe4f2;
+        margin: 0;
+        padding: 0;
         color: #333;
+    }
+
+    .app {
         max-width: 450px;
         margin: auto;
-        font-size: 20px;
+        padding: 20px;
     }
 
     h2 {
-        text-align: center;
         color: #d63384;
-        font-size: 28px;
+        text-align: center;
     }
 
-    h3 {
-        color:#d63384;
-        text-align:center;
-        font-weight: bold;
-    }
-
-    .card {
-        background: white;
-        padding: 20px;
-        border-radius: 15px;
-        box-shadow: 0 0 10px #ffb6d6;
-        margin-top: 20px;
-    }
-
-    label {
-        font-weight: bold;
-        display: block;
-        margin-top: 15px;
-    }
-
-    input, select, textarea {
+    input, select, button, textarea {
         width: 100%;
-        padding: 12px;
-        border-radius: 10px;
+        padding: 14px;
+        margin: 8px 0;
+        border-radius: 12px;
         border: 1px solid #ccc;
-        margin-top: 5px;
         font-size: 18px;
     }
 
     button {
-        width: 100%;
-        padding: 14px;
-        background: #ff4da6;
-        border: none;
+        background: #ff5fa2;
         color: white;
-        border-radius: 12px;
-        font-size: 22px;
-        margin-top: 15px;
-        font-weight: bold;
-    }
-
-    .inline {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-top: 10px;
-    }
-
-    .qty-btn {
-        width: 45px;
-        height: 45px;
-        font-size: 26px;
-        border-radius: 50%;
         border: none;
-        background: #ff82c4;
-        color: white;
         font-weight: bold;
+        cursor: pointer;
     }
 
-    .status-btn {
-        padding: 12px;
-        width: 48%;
-        border-radius: 10px;
-        border: none;
-        font-size: 20px;
-        color: white;
-        font-weight: bold;
+    button:hover {
+        background: #e64b8a;
     }
 
-    .pago {
-        background: #28a745;
-    }
+    .hidden { display: none; }
 
-    .pendente {
-        background: #dc3545;
-    }
-
-    .result, #historicoDia, #fechamento {
-        margin-top: 20px;
-        font-size: 20px;
+    .pedido {
         background: white;
-        padding: 15px;
-        border-radius: 15px;
-        box-shadow: 0 0 10px #ffb6d6;
+        padding: 12px;
+        border-radius: 12px;
+        margin-bottom: 10px;
+        border-left: 6px solid #ff5fa2;
+    }
+
+    .btn-small {
+        padding: 8px;
+        font-size: 14px;
+        border-radius: 10px;
     }
 
 </style>
 </head>
-
 <body>
 
-<h3 id="usuarioLogado"></h3>
+<div class="app">
 
-<!-- LOGIN -->
-<div id="login" class="card">
-    <h2>Pastelaria da Nathy</h2>
-
-    <label>Usuário</label>
-    <select id="usuario">
-        <option value="Nathy">Nathy</option>
-        <option value="Jean">Jean</option>
-        <option value="Juan">Juan</option>
-    </select>
-
-    <label>Senha</label>
-    <input type="password" id="senha" placeholder="Digite sua senha">
-
-    <button onclick="login()">Entrar</button>
-</div>
-
-<!-- APP PRINCIPAL -->
-<div id="app" style="display:none;">
-
-<div class="card">
-    <label>Data</label>
-    <input type="date" id="data">
-
-    <label>Sabor do Pastel</label>
-    <select id="sabor">
-        <option value="Carne com Cheddar">Carne com Cheddar</option>
-        <option value="Frango com Cheddar">Frango com Cheddar</option>
-        <option value="Carne com Requeijão">Carne com Requeijão</option>
-        <option value="Frango com Requeijão">Frango com Requeijão</option>
-    </select>
-
-    <label>Quantidade</label>
-    <div class="inline">
-        <button class="qty-btn" onclick="alterarQtd(-1)">-</button>
-        <div id="qtd" style="font-size:28px; font-weight:bold;">1</div>
-        <button class="qty-btn" onclick="alterarQtd(1)">+</button>
+    <!-- LOGIN -->
+    <div id="login">
+        <h2>Pastelaria da Nathy</h2>
+        <select id="userSelect">
+            <option>Nathy</option>
+            <option>Jean</option>
+            <option>Juan</option>
+        </select>
+        <input type="password" id="senha" placeholder="Senha">
+        <button onclick="login()">Entrar</button>
     </div>
 
-    <label>Com Refri (R$ 2)</label>
-    <select id="refri">
-        <option value="0">Não</option>
-        <option value="2">Sim</option>
-    </select>
-
-    <label>Observação</label>
-    <textarea id="obs" rows="2"></textarea>
-
-    <label>Status</label>
-    <div class="inline">
-        <button class="status-btn pago" onclick="setStatus('Pago')">Pago</button>
-        <button class="status-btn pendente" onclick="setStatus('Pendente')">Pendente</button>
+    <!-- MENU -->
+    <div id="menu" class="hidden">
+        <h2 id="userTitle"></h2>
+        <button onclick="showPage('vendas')">Registrar Venda</button>
+        <button onclick="showPage('lista')">Lista de Vendas</button>
+        <button onclick="showPage('fechar')">Fechar Dia</button>
+        <button onclick="backup()">Backup</button>
+        <input type="file" id="restoreFile" onchange="restoreBackup()">
+        <button onclick="logout()">Sair</button>
     </div>
 
-    <button onclick="registrar()">Registrar Pedido</button>
-    <button onclick="mostrarHistorico()">Ver Histórico</button>
-    <button onclick="fecharDia()">Fechar Dia</button>
+    <!-- REGISTRAR VENDA -->
+    <div id="vendas" class="hidden">
+        <h2>Nova Venda</h2>
+
+        <input type="date" id="data">
+        
+        <select id="item">
+            <option>Carne com cheddar</option>
+            <option>Frango com cheddar</option>
+            <option>Carne com requeijão</option>
+            <option>Frango com requeijão</option>
+        </select>
+
+        <input type="number" id="qtd" min="1" value="1">
+
+        <label><input type="checkbox" id="refri"> Com refri (+2)</label>
+
+        <textarea id="obs" placeholder="Observações (opcional)"></textarea>
+
+        <label>Status:</label>
+        <button onclick="setPago(true)">Pago</button>
+        <button onclick="setPago(false)">Pendente</button>
+
+        <button onclick="salvarPedido()">Salvar Pedido</button>
+        <button onclick="showPage('menu')">Voltar</button>
+    </div>
+
+    <!-- LISTA -->
+    <div id="lista" class="hidden">
+        <h2>Vendas Registradas</h2>
+        <div id="listaConteudo"></div>
+        <button onclick="showPage('menu')">Voltar</button>
+    </div>
+
+    <!-- FECHAR DIA -->
+    <div id="fechar" class="hidden">
+        <h2>Fechamento</h2>
+        <div id="fecharConteudo"></div>
+        <button onclick="showPage('menu')">Voltar</button>
+    </div>
+
 </div>
 
-<div id="resultado"></div>
-<div id="historicoDia"></div>
-<div id="fechamento"></div>
-
-</div>
 
 <script>
-let usuarioAtivo = "";
-let statusPedido = "Pendente";
+/* ========= BANCO DE DADOS ========= */
+let db = JSON.parse(localStorage.getItem("pastelariaDB") || "[]");
+let pagoStatus = false;
+let usuarioLogado = "";
 
-let pedidos = JSON.parse(localStorage.getItem("pedidosNathy") || "[]");
-let totaisVendedores = JSON.parse(localStorage.getItem("totaisVendedoresNathy") || `{
-    "Nathy": 0,
-    "Jean": 0,
-    "Juan": 0
-}`);
-
-function salvarLocal() {
-    localStorage.setItem("pedidosNathy", JSON.stringify(pedidos));
-    localStorage.setItem("totaisVendedoresNathy", JSON.stringify(totaisVendedores));
-}
-
+/* ========= LOGIN ========= */
 function login() {
-    const user = document.getElementById("usuario").value;
-    const pass = document.getElementById("senha").value;
-
-    if (pass !== "1234") {
-        alert("Senha incorreta");
+    const senha = document.getElementById("senha").value;
+    if (senha !== "1234") {
+        alert("Senha incorreta!");
         return;
     }
 
-    usuarioAtivo = user;
+    usuarioLogado = document.getElementById("userSelect").value;
 
-    document.getElementById("login").style.display = "none";
-    document.getElementById("app").style.display = "block";
-    document.getElementById("usuarioLogado").innerText = "Vendedor: " + user;
+    document.getElementById("login").classList.add("hidden");
+    document.getElementById("menu").classList.remove("hidden");
+
+    document.getElementById("userTitle").innerText =
+        "Vendedor: " + usuarioLogado;
 }
 
-function alterarQtd(n) {
-    let qtd = parseInt(document.getElementById("qtd").innerText);
-    qtd += n;
-    if (qtd < 1) qtd = 1;
-    document.getElementById("qtd").innerText = qtd;
+/* ========= LOGOUT ========= */
+function logout() {
+    location.reload();
 }
 
-function setStatus(s) {
-    statusPedido = s;
+/* ========= TROCAR PÁGINAS ========= */
+function showPage(id) {
+    document.querySelectorAll(".app > div").forEach(div => div.classList.add("hidden"));
+    document.getElementById(id).classList.remove("hidden");
+
+    if (id === "lista") renderLista();
+    if (id === "fechar") renderFechamento();
 }
 
-function registrar() {
-    const data = document.getElementById("data").value;
-    const sabor = document.getElementById("sabor").value;
-    const qtd = parseInt(document.getElementById("qtd").innerText);
-    const refri = parseInt(document.getElementById("refri").value);
-    const obs = document.getElementById("obs").value;
-
-    const total = (10 + refri) * qtd;
-
-    totaisVendedores[usuarioAtivo] += total;
-
-    pedidos.push({
-        vendedor: usuarioAtivo,
-        data,
-        sabor,
-        qtd,
-        refri: refri > 0 ? "Sim" : "Não",
-        obs,
-        status: statusPedido,
-        total
-    });
-
-    salvarLocal();
-
-    document.getElementById("resultado").innerHTML = `
-        <b>Pedido Registrado:</b><br>
-        Vendedor: ${usuarioAtivo}<br>
-        Data: ${data}<br>
-        Sabor: ${sabor}<br>
-        Qtd: ${qtd}<br>
-        Refri: ${refri > 0 ? "Sim" : "Não"}<br>
-        Obs: ${obs}<br>
-        Status: ${statusPedido}<br><br>
-        <b>Total: R$ ${total.toFixed(2)}</b>
-    `;
+/* ========= STATUS ========= */
+function setPago(v) {
+    pagoStatus = v;
 }
 
-function mostrarHistorico() {
-    let html = "<h3>Histórico de Pedidos</h3>";
-    pedidos.forEach(p => {
-        html += `
-            <div style='margin-bottom:10px;'>
-                <b>${p.data}</b> - ${p.sabor} (${p.qtd}) - R$ ${p.total.toFixed(2)}<br>
+/* ========= SALVAR PEDIDO ========= */
+function salvarPedido() {
+    const pedido = {
+        vendedor: usuarioLogado,
+        data: document.getElementById("data").value,
+        item: document.getElementById("item").value,
+        qtd: Number(document.getElementById("qtd").value),
+        refri: document.getElementById("refri").checked,
+        obs: document.getElementById("obs").value,
+        pago: pagoStatus,
+        valor: 10 * Number(document.getElementById("qtd").value) + (document.getElementById("refri").checked ? 2 : 0)
+    };
+
+    db.push(pedido);
+    localStorage.setItem("pastelariaDB", JSON.stringify(db));
+
+    alert("Venda registrada!");
+    showPage("menu");
+}
+
+/* ========= LISTA ========= */
+function renderLista() {
+    const div = document.getElementById("listaConteudo");
+    div.innerHTML = "";
+
+    db.forEach((p, i) => {
+        div.innerHTML += `
+            <div class="pedido">
+                <b>${p.item}</b> — R$ ${p.valor}<br>
+                Qtd: ${p.qtd} | Data: ${p.data}<br>
+                Refri: ${p.refri ? "Sim" : "Não"}<br>
+                Status: ${p.pago ? "Pago" : "Pendente"}<br>
                 Vendedor: ${p.vendedor}<br>
-                Refri: ${p.refri} | Status: ${p.status}<br>
+                Obs: ${p.obs || "(nenhuma)"}<br><br>
+                <button class="btn-small" onclick="editar(${i})">Editar</button>
             </div>
         `;
     });
-    document.getElementById("historicoDia").innerHTML = html;
 }
 
-function fecharDia() {
-    let totalGeral = 0;
-    let totalPago = 0;
-    let totalPendente = 0;
+/* ========= EDITAR ========= */
+function editar(i) {
+    const p = db[i];
 
-    pedidos.forEach(p => {
-        totalGeral += p.total;
-        if (p.status === "Pago") totalPago += p.total;
-        else totalPendente += p.total;
+    document.getElementById("data").value = p.data;
+    document.getElementById("item").value = p.item;
+    document.getElementById("qtd").value = p.qtd;
+    document.getElementById("refri").checked = p.refri;
+    document.getElementById("obs").value = p.obs;
+    pagoStatus = p.pago;
+
+    db.splice(i, 1);
+    localStorage.setItem("pastelariaDB", JSON.stringify(db));
+
+    showPage("vendas");
+}
+
+/* ========= FECHAMENTO ========= */
+function renderFechamento() {
+    let vendedores = {};
+
+    db.forEach(p => {
+        if (!vendedores[p.vendedor]) vendedores[p.vendedor] = 0;
+        vendedores[p.vendedor] += p.valor;
     });
 
-    let html = `
-        <h3>Fechamento do Dia</h3>
-        Total Geral: R$ ${totalGeral.toFixed(2)}<br>
-        Pago: R$ ${totalPago.toFixed(2)}<br>
-        Pendente: R$ ${totalPendente.toFixed(2)}<br><br>
+    let html = "";
+    for (let v in vendedores) {
+        html += `<b>${v}</b>: R$ ${vendedores[v]}<br>`;
+    }
 
-        <h3>Total por Vendedor</h3>
-        Nathy: R$ ${totaisVendedores["Nathy"].toFixed(2)}<br>
-        Jean: R$ ${totaisVendedores["Jean"].toFixed(2)}<br>
-        Juan: R$ ${totaisVendedores["Juan"].toFixed(2)}<br>
-    `;
+    document.getElementById("fecharConteudo").innerHTML = html;
+}
 
-    document.getElementById("fechamento").innerHTML = html;
+/* ========= BACKUP ========= */
+function backup() {
+    const blob = new Blob([JSON.stringify(db)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "pastelaria_backup.json";
+    a.click();
+}
+
+/* ========= RESTAURAR BACKUP ========= */
+function restoreBackup() {
+    const file = document.getElementById("restoreFile").files[0];
+    const reader = new FileReader();
+
+    reader.onload = e => {
+        db = JSON.parse(e.target.result);
+        localStorage.setItem("pastelariaDB", JSON.stringify(db));
+        alert("Backup restaurado!");
+    };
+
+    reader.readAsText(file);
 }
 
 </script>
