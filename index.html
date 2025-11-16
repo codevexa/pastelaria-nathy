@@ -1,120 +1,597 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pastelaria da Nathy — Vendas</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Registro de Vendas — Pastelaria</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #fff0f6; color: #333; }
-    h1 { color: #d63384; }
-    label { display: block; margin-top: 12px; font-weight: bold; }
-    input, select, button, textarea { width: 100%; padding: 10px; margin-top: 4px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px; }
-    button { background-color: #ff4da6; color: white; border: none; cursor: pointer; margin-top: 12px; }
-    button:hover { opacity: 0.9; }
-    .msg { margin-top: 15px; font-size: 16px; }
+    :root{
+      --bg:#0f1724; /* dark base */
+      --card:#0b1220;
+      --muted:#98a0b3;
+      --accent:#22c55e;
+      --danger:#ef4444;
+      --glass: rgba(255,255,255,0.03);
+      --glass-2: rgba(255,255,255,0.02);
+      --text:#e6eef8;
+      --accent-2:#60a5fa;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background: linear-gradient(180deg,#071025 0%, #081226 60%);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      min-height:100vh;
+      padding:18px;
+      display:flex;
+      gap:18px;
+      align-items:flex-start;
+      justify-content:center;
+    }
+
+    .container{
+      width:100%;
+      max-width:1100px;
+      display:grid;
+      grid-template-columns: 380px 1fr;
+      gap:18px;
+      align-items:start;
+    }
+
+    .panel{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:12px;
+      padding:16px;
+      box-shadow: 0 6px 18px rgba(2,6,23,0.6);
+      border:1px solid rgba(255,255,255,0.03);
+    }
+
+    h2{margin:0 0 12px 0;font-size:18px}
+    label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+    input[type="text"], input[type="date"], input[type="number"], select{
+      width:100%;
+      padding:10px 12px;
+      border-radius:8px;
+      border:1px solid rgba(255,255,255,0.04);
+      background:var(--glass);
+      color:var(--text);
+      margin-bottom:12px;
+      outline:none;
+      font-size:14px;
+    }
+    .row{display:flex;gap:8px}
+    .row .col{flex:1}
+    .btn{
+      display:inline-block;
+      padding:10px 12px;
+      border-radius:8px;
+      background:var(--accent);
+      color:#062014;
+      font-weight:600;
+      cursor:pointer;
+      border:none;
+    }
+    .btn.gray{background:transparent;color:var(--text);border:1px solid rgba(255,255,255,0.05)}
+    .small{font-size:13px;padding:8px 10px;border-radius:8px}
+    .muted{color:var(--muted);font-size:13px}
+
+    .list{
+      margin-top:8px;
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+
+    .card-order{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      padding:10px;
+      border-radius:10px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.012), rgba(255,255,255,0.009));
+      border:1px solid rgba(255,255,255,0.02);
+    }
+    .order-left{flex:1}
+    .order-meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .badge{font-size:12px;padding:6px 8px;border-radius:999px;background:var(--glass-2);color:var(--muted)}
+    .status-paid{background:linear-gradient(90deg,#083712,#06491a); color:#bff7d0}
+    .status-pend{background:linear-gradient(90deg,#241104,#3a271a); color:#ffd8d0}
+
+    .order-actions{display:flex;gap:8px}
+
+    .summary{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+    .stat{flex:1;min-width:140px;padding:12px;border-radius:10px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.007));border:1px solid rgba(255,255,255,0.02)}
+    .stat h3{margin:0;font-size:18px}
+    .stat p{margin:6px 0 0 0;font-size:14px;color:var(--muted)}
+
+    footer.small{margin-top:12px;color:var(--muted);font-size:13px;text-align:center}
+
+    /* simple toast */
+    .toast{
+      position:fixed;
+      right:20px;
+      bottom:20px;
+      background:#0b1530;
+      color:var(--text);
+      padding:10px 14px;
+      border-radius:10px;
+      box-shadow:0 8px 20px rgba(2,6,23,0.6);
+      display:none;
+      z-index:2000;
+      border:1px solid rgba(255,255,255,0.03);
+    }
+
+    .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}
+    .filters{display:flex;gap:8px;align-items:center}
+
+    .controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .search{padding:10px;border-radius:999px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:var(--text);min-width:180px}
+
+    .clients-list{margin-top:10px;display:flex;flex-direction:column;gap:6px}
+    .client-item{display:flex;justify-content:space-between;gap:8px;padding:8px;border-radius:8px;background:var(--glass)}
+    .tiny{font-size:12px;color:var(--muted)}
+
+    @media (max-width:920px){
+      .container{grid-template-columns:1fr; padding-bottom:40px}
+    }
   </style>
 </head>
 <body>
+  <div class="container">
+    <!-- LEFT: Form -->
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h2>Registrar Venda — Pastel</h2>
+        <div class="muted tiny">v1.0</div>
+      </div>
 
-  <h1>Registrar Venda - Pastelaria da Nathy</h1>
+      <form id="orderForm" autocomplete="off">
+        <label>Data do pedido</label>
+        <input type="date" id="date" required>
 
-  <label>Data</label>
-  <input type="date" id="data" />
+        <label>Vendedor</label>
+        <input type="text" id="seller" placeholder="Nome do vendedor" required>
 
-  <label>Vendedor</label>
-  <select id="vendedor">
-    <option>Nathy</option>
-    <option>Jean</option>
-    <option>Juan</option>
-  </select>
+        <label>Cliente (opcional)</label>
+        <input type="text" id="client" placeholder="Nome do cliente">
 
-  <label>Cliente</label>
-  <input type="text" id="cliente" placeholder="Nome do cliente" />
+        <label>Item</label>
+        <input type="text" id="item" placeholder="Ex: Pastel de Carne" required>
 
-  <label>Item</label>
-  <select id="item">
-    <option>Carne com Cheddar</option>
-    <option>Frango com Cheddar</option>
-    <option>Carne com Requeijão</option>
-    <option>Frango com Requeijão</option>
-  </select>
+        <div class="row">
+          <div class="col">
+            <label>Quantidade</label>
+            <input type="number" id="qty" min="1" value="1" required>
+          </div>
+          <div class="col">
+            <label>Valor unit. (R$)</label>
+            <input type="number" id="price" min="0" step="0.01" placeholder="Ex: 10.00" value="10.00">
+          </div>
+        </div>
 
-  <label>Quantidade</label>
-  <input type="number" id="quantidade" min="1" value="1" />
+        <label><input type="checkbox" id="hasRefri"> Com refri?</label>
+        <div class="row" style="align-items:center;">
+          <div style="flex:1">
+            <label>Qtd refri</label>
+            <input type="number" id="refriQty" min="0" value="0" disabled>
+          </div>
+          <div style="flex:1">
+            <label>Valor refri (R$)</label>
+            <input type="number" id="refriPrice" min="0" step="0.01" value="0.00" disabled>
+          </div>
+        </div>
 
-  <label>Com refri? (+ R$2)</label>
-  <select id="com_refri">
-    <option value="0">Não</option>
-    <option value="1">Sim</option>
-  </select>
+        <label>Status</label>
+        <select id="status">
+          <option value="pendente">Pendente</option>
+          <option value="pago">Pago</option>
+        </select>
 
-  <label>Pago?</label>
-  <select id="pago">
-    <option value="1">Sim</option>
-    <option value="0">Não</option>
-  </select>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn" type="submit">Adicionar Venda</button>
+          <button class="btn gray" type="button" id="clearForm">Limpar</button>
+        </div>
+      </form>
 
-  <button onclick="salvarVenda()">Salvar Venda</button>
+      <div style="margin-top:12px">
+        <label>Importar / Exportar</label>
+        <div style="display:flex;gap:8px">
+          <button class="small gray" id="exportCsv">Exportar CSV</button>
+          <input id="importFile" type="file" accept=".csv" style="display:none">
+          <button class="small gray" id="importBtn">Importar CSV</button>
+          <button class="small gray" id="clearAll">Apagar tudo</button>
+        </div>
+      </div>
 
-  <div class="msg" id="mensagem"></div>
+      <footer class="small">Salvo localmente no seu navegador. Use exportar para backup.</footer>
+    </div>
 
-<script>
-  // URL do seu novo Web App
-  const ENDPOINT = "https://script.google.com/macros/s/AKfycbzDmAT8O3KCvinmLdSHxZzcOaetKcH_TimqcoPxoEBejl4LiqUPq2Hrj_Stf2sLRBI/exec";
+    <!-- RIGHT: List + summary -->
+    <div class="panel">
+      <div class="topbar">
+        <div>
+          <h2>Pedidos</h2>
+          <div class="tiny muted">Lista de vendas registradas</div>
+        </div>
 
-  async function salvarVenda() {
-    const data = document.getElementById("data").value;
-    const vendedor = document.getElementById("vendedor").value;
-    const cliente = document.getElementById("cliente").value.trim();
-    const item = document.getElementById("item").value;
-    const quantidade = parseInt(document.getElementById("quantidade").value);
-    const com_refri = document.getElementById("com_refri").value === "1";
-    const pago = document.getElementById("pago").value === "1";
-    const valor_total = (10 * quantidade) + (com_refri ? 2 : 0);
+        <div class="controls">
+          <input class="search" id="search" placeholder="Pesquisar por cliente, item ou vendedor">
+          <div class="filters">
+            <button class="small gray" data-filter="all">Todos</button>
+            <button class="small gray" data-filter="pago">Pagos</button>
+            <button class="small gray" data-filter="pendente">Pendentes</button>
+          </div>
+          <button class="small" id="notifPerm">Ativar Notifs</button>
+        </div>
+      </div>
 
-    if (!cliente) {
-      document.getElementById("mensagem").innerText = "Por favor, preencha o nome do cliente.";
-      return;
-    }
+      <div class="summary" id="summaryWrap">
+        <div class="stat">
+          <h3 id="totalCount">0</h3>
+          <p>Total de pedidos</p>
+        </div>
+        <div class="stat">
+          <h3 id="totalValue">R$ 0,00</h3>
+          <p>Valor total (inclui refri)</p>
+        </div>
+        <div class="stat">
+          <h3 id="toReceive">R$ 0,00</h3>
+          <p>Valor a receber (pendentes)</p>
+        </div>
+      </div>
 
-    const body = {
-      data,
-      vendedor,
-      cliente,
-      item,
-      quantidade,
-      com_refri,
-      pago,
-      valor_total
+      <div id="ordersList" class="list" style="margin-top:12px"></div>
+
+      <h3 style="margin-top:18px">Clientes que devem</h3>
+      <div class="clients-list" id="clientsList"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    /* ---------- Storage key ---------- */
+    const STORAGE_KEY = 'pastel_vendas_v1';
+
+    /* ---------- utilities ---------- */
+    const $ = (q) => document.querySelector(q);
+    const fmt = (n) => Number(n || 0).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+    const toast = (txt) => {
+      const t = $('#toast');
+      t.textContent = txt;
+      t.style.display = 'block';
+      setTimeout(()=> t.style.display='none', 2600);
     };
 
-    try {
-      const resp = await fetch(ENDPOINT, {
-        method: "POST",
-        body: JSON.stringify(body)
-      });
-      const json = await resp.json();
-      if (json.status === "sucesso") {
-        document.getElementById("mensagem").innerText = "Venda registrada com sucesso!";
-        limparForm();
-      } else {
-        document.getElementById("mensagem").innerText = "Erro ao registrar: " + JSON.stringify(json);
-      }
-    } catch (e) {
-      document.getElementById("mensagem").innerText = "Erro de rede: " + e.message;
+    /* ---------- load/save ---------- */
+    function loadOrders(){
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch(e){ return []; }
     }
-  }
+    function saveOrders(arr){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+    }
 
-  function limparForm() {
-    document.getElementById("cliente").value = "";
-    document.getElementById("quantidade").value = "1";
-    document.getElementById("com_refri").value = "0";
-    document.getElementById("pago").value = "0";
-  }
+    /* ---------- create order object ---------- */
+    function createOrder(data){
+      return {
+        id: 'o' + Date.now() + Math.floor(Math.random()*900),
+        date: data.date,
+        seller: data.seller.trim(),
+        client: data.client.trim(),
+        item: data.item.trim(),
+        qty: Number(data.qty) || 0,
+        price: Number(data.price) || 0,
+        hasRefri: !!data.hasRefri,
+        refriQty: Number(data.refriQty) || 0,
+        refriPrice: Number(data.refriPrice) || 0,
+        status: data.status,
+        createdAt: new Date().toISOString()
+      };
+    }
 
-  // Define data padrão como hoje
-  document.getElementById("data").value = new Date().toISOString().slice(0,10);
-</script>
+    /* ---------- calc totals ---------- */
+    function calcTotals(list){
+      let total = 0, toReceive = 0;
+      list.forEach(o=>{
+        const val = (o.qty * o.price) + (o.hasRefri ? (o.refriQty * o.refriPrice) : 0);
+        total += val;
+        if (o.status === 'pendente') toReceive += val;
+      });
+      return {total, toReceive};
+    }
 
+    /* ---------- render ---------- */
+    function renderList(filter='all', search=''){
+      const container = $('#ordersList');
+      container.innerHTML = '';
+      let list = loadOrders().slice().sort((a,b)=> b.createdAt.localeCompare(a.createdAt));
+      if (filter !== 'all') list = list.filter(l=> l.status === filter);
+      if (search.trim()){
+        const s = search.toLowerCase();
+        list = list.filter(o => 
+          (o.client || '').toLowerCase().includes(s) ||
+          (o.item || '').toLowerCase().includes(s) ||
+          (o.seller || '').toLowerCase().includes(s)
+        );
+      }
+
+      if (list.length === 0){
+        container.innerHTML = `<div class="muted tiny">Nenhum pedido encontrado.</div>`;
+      } else {
+        list.forEach(o=>{
+          const val = (o.qty * o.price) + (o.hasRefri ? (o.refriQty * o.refriPrice) : 0);
+          const div = document.createElement('div');
+          div.className = 'card-order';
+          div.innerHTML = `
+            <div class="order-left">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div>
+                  <strong>${escapeHtml(o.item || '—')}</strong>
+                  <div class="muted tiny">${o.qty} x R$ ${fmt(o.price)} ${o.hasRefri ? `+ ${o.refriQty} refri` : ''}</div>
+                </div>
+                <div style="text-align:right">
+                  <div class="badge ${o.status==='pago' ? 'status-paid' : 'status-pend'}">${o.status==='pago' ? 'Pago' : 'Pendente'}</div>
+                  <div class="tiny muted">${formatDateBR(o.date)}</div>
+                </div>
+              </div>
+              <div class="order-meta" style="margin-top:8px">
+                <div class="badge">Vendedor: ${escapeHtml(o.seller)}</div>
+                <div class="badge">Cliente: ${escapeHtml(o.client || '—')}</div>
+                <div class="badge">Total: R$ ${fmt(val)}</div>
+              </div>
+            </div>
+            <div class="order-actions">
+              ${o.status === 'pendente' ? `<button class="small" data-action="markPaid" data-id="${o.id}">Marcar Pago</button>` : ''}
+              <button class="small gray" data-action="delete" data-id="${o.id}">Excluir</button>
+            </div>
+          `;
+          container.appendChild(div);
+        });
+      }
+
+      // totals
+      const all = loadOrders();
+      $('#totalCount').textContent = all.length;
+      const totals = calcTotals(all);
+      $('#totalValue').textContent = `R$ ${fmt(totals.total)}`;
+      $('#toReceive').textContent = `R$ ${fmt(totals.toReceive)}`;
+
+      renderClientsList(all);
+    }
+
+    function renderClientsList(list){
+      const wrap = $('#clientsList');
+      wrap.innerHTML = '';
+      // sum per client (only pendentes)
+      const map = {};
+      list.forEach(o=>{
+        if(!o.client) return;
+        const val = (o.qty * o.price) + (o.hasRefri ? (o.refriQty * o.refriPrice) : 0);
+        if (o.status === 'pendente'){
+          if (!map[o.client]) map[o.client] = 0;
+          map[o.client] += val;
+        }
+      });
+      const entries = Object.entries(map).sort((a,b)=> b[1]-a[1]);
+      if (entries.length === 0){
+        wrap.innerHTML = `<div class="muted tiny">Nenhum cliente com débito.</div>`;
+      } else {
+        entries.forEach(([client, value])=>{
+          const it = document.createElement('div');
+          it.className = 'client-item';
+          it.innerHTML = `<div><strong>${escapeHtml(client)}</strong><div class="tiny muted">Deve</div></div><div><strong>R$ ${fmt(value)}</strong></div>`;
+          wrap.appendChild(it);
+        });
+      }
+    }
+
+    /* ---------- helpers ---------- */
+    function formatDateBR(dateStr){
+      if(!dateStr) return '-';
+      const d = new Date(dateStr);
+      if (isNaN(d)) return dateStr;
+      return d.toLocaleDateString('pt-BR');
+    }
+    function escapeHtml(s){
+      return String(s || '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
+    }
+
+    /* ---------- events ---------- */
+    document.addEventListener('DOMContentLoaded', ()=>{
+      // set default date to today
+      $('#date').valueAsDate = new Date();
+
+      renderList();
+
+      // handle refri toggles
+      $('#hasRefri').addEventListener('change', (e)=>{
+        const on = e.target.checked;
+        $('#refriQty').disabled = !on;
+        $('#refriPrice').disabled = !on;
+        if(!on){
+          $('#refriQty').value = 0;
+          $('#refriPrice').value = '0.00';
+        } else {
+          $('#refriQty').value = 1;
+          $('#refriPrice').value = '5.00';
+        }
+      });
+
+      // submit form
+      $('#orderForm').addEventListener('submit', (ev)=>{
+        ev.preventDefault();
+        const data = {
+          date: $('#date').value,
+          seller: $('#seller').value || '—',
+          client: $('#client').value || '',
+          item: $('#item').value || '—',
+          qty: $('#qty').value,
+          price: $('#price').value,
+          hasRefri: $('#hasRefri').checked,
+          refriQty: $('#refriQty').value,
+          refriPrice: $('#refriPrice').value,
+          status: $('#status').value
+        };
+        const orders = loadOrders();
+        const order = createOrder(data);
+        orders.push(order);
+        saveOrders(orders);
+        renderList(currentFilter, $('#search').value);
+        toast('Venda adicionada!');
+        sendNotification(`Nova venda: ${order.item}`, `Vendedor: ${order.seller} — ${order.qty}x — ${order.client || 'Cliente não informado'}`);
+        $('#orderForm').reset();
+        $('#date').valueAsDate = new Date();
+        $('#refriQty').disabled = true;
+        $('#refriPrice').disabled = true;
+      });
+
+      // clear form
+      $('#clearForm').addEventListener('click', ()=>{
+        $('#orderForm').reset();
+        $('#date').valueAsDate = new Date();
+        $('#refriQty').disabled = true;
+        $('#refriPrice').disabled = true;
+      });
+
+      // list actions (delegate)
+      $('#ordersList').addEventListener('click', (e)=>{
+        const btn = e.target.closest('button');
+        if(!btn) return;
+        const action = btn.dataset.action;
+        const id = btn.dataset.id;
+        if(action === 'delete'){
+          if (!confirm('Excluir este pedido?')) return;
+          let list = loadOrders().filter(x=> x.id !== id);
+          saveOrders(list);
+          renderList(currentFilter, $('#search').value);
+        } else if(action === 'markPaid'){
+          let list = loadOrders().map(x=>{
+            if (x.id === id) x.status = 'pago';
+            return x;
+          });
+          saveOrders(list);
+          renderList(currentFilter, $('#search').value);
+          toast('Pedido marcado como pago');
+        }
+      });
+
+      // filters
+      document.querySelectorAll('[data-filter]').forEach(b=>{
+        b.addEventListener('click', (ev)=>{
+          currentFilter = b.dataset.filter;
+          document.querySelectorAll('[data-filter]').forEach(x=>x.classList.remove('active'));
+          b.classList.add('active');
+          renderList(currentFilter, $('#search').value);
+        });
+      });
+
+      // search
+      $('#search').addEventListener('input', (e)=>{
+        renderList(currentFilter, e.target.value);
+      });
+
+      // export CSV
+      $('#exportCsv').addEventListener('click', ()=>{
+        const list = loadOrders();
+        if (!list.length) { toast('Sem dados para exportar'); return; }
+        const headers = ['id','date','seller','client','item','qty','price','hasRefri','refriQty','refriPrice','status','createdAt'];
+        const csv = [headers.join(',')].concat(list.map(o => headers.map(h => JSON.stringify(o[h] ?? '')).join(','))).join('\\n');
+        const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'vendas_pastel_export.csv';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        toast('Exportado CSV');
+      });
+
+      // import CSV
+      $('#importBtn').addEventListener('click', ()=> $('#importFile').click());
+      $('#importFile').addEventListener('change', async (e)=>{
+        const f = e.target.files[0];
+        if(!f) return;
+        const txt = await f.text();
+        try {
+          const lines = txt.split(/\\r?\\n/).filter(Boolean);
+          const headers = lines.shift().split(',').map(h=>h.trim().replaceAll('"',''));
+          const out = lines.map(l=>{
+            // naive CSV parse (works with our exported format)
+            const cols = JSON.parse('[' + l + ']');
+            const obj = {};
+            headers.forEach((h,i)=> obj[h]=cols[i]);
+            // type conversions
+            obj.qty = Number(obj.qty) || 0;
+            obj.price = Number(obj.price) || 0;
+            obj.hasRefri = (obj.hasRefri === 'true' || obj.hasRefri === true);
+            obj.refriQty = Number(obj.refriQty) || 0;
+            obj.refriPrice = Number(obj.refriPrice) || 0;
+            return obj;
+          });
+          saveOrders(out);
+          renderList(currentFilter, $('#search').value);
+          toast('Importado com sucesso');
+        } catch(err){
+          console.error(err);
+          alert('Erro ao importar. CSV com formato inesperado.');
+        }
+        e.target.value = '';
+      });
+
+      // clear all
+      $('#clearAll').addEventListener('click', ()=>{
+        if (!confirm('Apagar todos os registros? Esta ação não pode ser desfeita.')) return;
+        localStorage.removeItem(STORAGE_KEY);
+        renderList(currentFilter, $('#search').value);
+        toast('Todos os dados apagados');
+      });
+
+      // notification permission button
+      $('#notifPerm').addEventListener('click', async ()=>{
+        if (!('Notification' in window)) {
+          alert('Notificações não suportadas neste navegador.');
+          return;
+        }
+        const p = await Notification.requestPermission();
+        if (p === 'granted') toast('Notificações ativadas');
+        else toast('Permissão não concedida');
+      });
+
+      // click outside to close toasts? not necessary
+    });
+
+    // current filter
+    let currentFilter = 'all';
+
+    /* ---------- notifications ---------- */
+    function sendNotification(title, body){
+      // visual toast always
+      toast(body.length > 60 ? (body.slice(0,60)+'...') : body);
+      if (window.Notification && Notification.permission === 'granted'){
+        try {
+          const n = new Notification(title, {body, icon: null});
+          // optional: close after 4s
+          setTimeout(()=> n.close(), 4000);
+        } catch(e){}
+      }
+    }
+
+    /* ---------- small safe CSV JSON parse helper (already used) ---------- */
+    // Extra: format currency in inputs on blur
+    document.body.addEventListener('blur', (e)=>{
+      if (e.target && (e.target.id === 'price' || e.target.id === 'refriPrice')){
+        const v = Number(e.target.value || 0).toFixed(2);
+        e.target.value = v;
+      }
+    }, true);
+  </script>
 </body>
 </html>
