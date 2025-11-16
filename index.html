@@ -6,7 +6,7 @@
   <title>Registro de Vendas — Pastelaria</title>
   <style>
     :root{
-      --bg:#0f1724; /* dark base */
+      --bg:#0f1724;
       --card:#0b1220;
       --muted:#98a0b3;
       --accent:#22c55e;
@@ -14,7 +14,6 @@
       --glass: rgba(255,255,255,0.03);
       --glass-2: rgba(255,255,255,0.02);
       --text:#e6eef8;
-      --accent-2:#60a5fa;
     }
     *{box-sizing:border-box}
     body{
@@ -22,8 +21,6 @@
       font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
       background: linear-gradient(180deg,#071025 0%, #081226 60%);
       color:var(--text);
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
       min-height:100vh;
       padding:18px;
       display:flex;
@@ -109,7 +106,6 @@
 
     footer.small{margin-top:12px;color:var(--muted);font-size:13px;text-align:center}
 
-    /* simple toast */
     .toast{
       position:fixed;
       right:20px;
@@ -118,7 +114,6 @@
       color:var(--text);
       padding:10px 14px;
       border-radius:10px;
-      box-shadow:0 8px 20px rgba(2,6,23,0.6);
       display:none;
       z-index:2000;
       border:1px solid rgba(255,255,255,0.03);
@@ -126,7 +121,6 @@
 
     .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}
     .filters{display:flex;gap:8px;align-items:center}
-
     .controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     .search{padding:10px;border-radius:999px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:var(--text);min-width:180px}
 
@@ -145,7 +139,7 @@
     <div class="panel">
       <div style="display:flex;justify-content:space-between;align-items:center">
         <h2>Registrar Venda — Pastel</h2>
-        <div class="muted tiny">v1.0</div>
+        <div class="muted tiny">v1.1</div>
       </div>
 
       <form id="orderForm" autocomplete="off">
@@ -153,34 +147,40 @@
         <input type="date" id="date" required>
 
         <label>Vendedor</label>
-        <input type="text" id="seller" placeholder="Nome do vendedor" required>
+        <select id="seller">
+          <option>Jean</option>
+          <option>Juan</option>
+          <option>Nathy</option>
+        </select>
 
         <label>Cliente (opcional)</label>
         <input type="text" id="client" placeholder="Nome do cliente">
 
         <label>Item</label>
-        <input type="text" id="item" placeholder="Ex: Pastel de Carne" required>
+        <select id="item" required>
+          <optgroup label="Pastel (R$ 10,00)">
+            <option value="Pastel - Carne com requeijão|10">Carne com requeijão</option>
+            <option value="Pastel - Frango com requeijão|10">Frango com requeijão</option>
+            <option value="Pastel - Carne com cheedar|10">Carne com cheedar</option>
+            <option value="Pastel - Frango com cheedar|10">Frango com cheedar</option>
+          </optgroup>
+          <optgroup label="Sacolés">
+            <option value="Sacolé - Fruta|1">Sacolé - Fruta (R$1,00)</option>
+            <option value="Sacolé - Cremoso|1.5">Sacolé - Cremoso (R$1,50)</option>
+          </optgroup>
+          <optgroup label="Bebida">
+            <option value="Refrigerante|2">Refrigerante (R$2,00)</option>
+          </optgroup>
+        </select>
 
         <div class="row">
           <div class="col">
             <label>Quantidade</label>
-            <input type="number" id="qty" min="1" value="1" required>
+            <input type="number" id="qty" min="0" value="1" required>
           </div>
           <div class="col">
-            <label>Valor unit. (R$)</label>
-            <input type="number" id="price" min="0" step="0.01" placeholder="Ex: 10.00" value="10.00">
-          </div>
-        </div>
-
-        <label><input type="checkbox" id="hasRefri"> Com refri?</label>
-        <div class="row" style="align-items:center;">
-          <div style="flex:1">
-            <label>Qtd refri</label>
-            <input type="number" id="refriQty" min="0" value="0" disabled>
-          </div>
-          <div style="flex:1">
-            <label>Valor refri (R$)</label>
-            <input type="number" id="refriPrice" min="0" step="0.01" value="0.00" disabled>
+            <label>Preço unit. (R$)</label>
+            <input type="number" id="unitPrice" min="0" step="0.01" value="10.00" required>
           </div>
         </div>
 
@@ -194,19 +194,11 @@
           <button class="btn" type="submit">Adicionar Venda</button>
           <button class="btn gray" type="button" id="clearForm">Limpar</button>
         </div>
+
+        <div id="quickTotal" style="margin-top:12px" class="muted">Total do item: R$ 10,00</div>
       </form>
 
-      <div style="margin-top:12px">
-        <label>Importar / Exportar</label>
-        <div style="display:flex;gap:8px">
-          <button class="small gray" id="exportCsv">Exportar CSV</button>
-          <input id="importFile" type="file" accept=".csv" style="display:none">
-          <button class="small gray" id="importBtn">Importar CSV</button>
-          <button class="small gray" id="clearAll">Apagar tudo</button>
-        </div>
-      </div>
-
-      <footer class="small">Salvo localmente no seu navegador. Use exportar para backup.</footer>
+      <footer class="small">Salvo localmente no seu navegador. Use export manual se precisar.</footer>
     </div>
 
     <!-- RIGHT: List + summary -->
@@ -235,7 +227,7 @@
         </div>
         <div class="stat">
           <h3 id="totalValue">R$ 0,00</h3>
-          <p>Valor total (inclui refri)</p>
+          <p>Valor total (inclui todos os itens)</p>
         </div>
         <div class="stat">
           <h3 id="toReceive">R$ 0,00</h3>
@@ -253,10 +245,14 @@
   <div class="toast" id="toast"></div>
 
   <script>
-    /* ---------- Storage key ---------- */
+    /* ---------- Config ---------- */
     const STORAGE_KEY = 'pastel_vendas_v1';
+    // Link do grupo que você forneceu — usado para abrir o WhatsApp com a mensagem.
+    const WHATSAPP_GROUP_LINK = 'https://chat.whatsapp.com/C8Vb1Y84j5S8goJxCTcg0Q';
+    // nota: para abrir conversa pre-preenchida usamos wa.me/?text=... — o usuário precisará selecionar o grupo manualmente no app.
+    // (Não existem endpoints públicos que enviem direto a um grupo sem API legítima.)
 
-    /* ---------- utilities ---------- */
+    /* ---------- util ---------- */
     const $ = (q) => document.querySelector(q);
     const fmt = (n) => Number(n || 0).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
     const toast = (txt) => {
@@ -266,7 +262,7 @@
       setTimeout(()=> t.style.display='none', 2600);
     };
 
-    /* ---------- load/save ---------- */
+    /* ---------- storage ---------- */
     function loadOrders(){
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
@@ -277,29 +273,26 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
     }
 
-    /* ---------- create order object ---------- */
+    /* ---------- create order ---------- */
     function createOrder(data){
       return {
         id: 'o' + Date.now() + Math.floor(Math.random()*900),
         date: data.date,
         seller: data.seller.trim(),
         client: data.client.trim(),
-        item: data.item.trim(),
+        item: data.itemName,
         qty: Number(data.qty) || 0,
-        price: Number(data.price) || 0,
-        hasRefri: !!data.hasRefri,
-        refriQty: Number(data.refriQty) || 0,
-        refriPrice: Number(data.refriPrice) || 0,
+        price: Number(data.unitPrice) || 0,
         status: data.status,
         createdAt: new Date().toISOString()
       };
     }
 
-    /* ---------- calc totals ---------- */
+    /* ---------- totals ---------- */
     function calcTotals(list){
       let total = 0, toReceive = 0;
       list.forEach(o=>{
-        const val = (o.qty * o.price) + (o.hasRefri ? (o.refriQty * o.refriPrice) : 0);
+        const val = (o.qty * o.price);
         total += val;
         if (o.status === 'pendente') toReceive += val;
       });
@@ -325,7 +318,7 @@
         container.innerHTML = `<div class="muted tiny">Nenhum pedido encontrado.</div>`;
       } else {
         list.forEach(o=>{
-          const val = (o.qty * o.price) + (o.hasRefri ? (o.refriQty * o.refriPrice) : 0);
+          const val = (o.qty * o.price);
           const div = document.createElement('div');
           div.className = 'card-order';
           div.innerHTML = `
@@ -333,7 +326,7 @@
               <div style="display:flex;justify-content:space-between;align-items:center">
                 <div>
                   <strong>${escapeHtml(o.item || '—')}</strong>
-                  <div class="muted tiny">${o.qty} x R$ ${fmt(o.price)} ${o.hasRefri ? `+ ${o.refriQty} refri` : ''}</div>
+                  <div class="muted tiny">${o.qty} x R$ ${fmt(o.price)}</div>
                 </div>
                 <div style="text-align:right">
                   <div class="badge ${o.status==='pago' ? 'status-paid' : 'status-pend'}">${o.status==='pago' ? 'Pago' : 'Pendente'}</div>
@@ -348,6 +341,7 @@
             </div>
             <div class="order-actions">
               ${o.status === 'pendente' ? `<button class="small" data-action="markPaid" data-id="${o.id}">Marcar Pago</button>` : ''}
+              <button class="small" data-action="sendGroup" data-id="${o.id}">Enviar para o Grupo</button>
               <button class="small gray" data-action="delete" data-id="${o.id}">Excluir</button>
             </div>
           `;
@@ -368,11 +362,10 @@
     function renderClientsList(list){
       const wrap = $('#clientsList');
       wrap.innerHTML = '';
-      // sum per client (only pendentes)
       const map = {};
       list.forEach(o=>{
         if(!o.client) return;
-        const val = (o.qty * o.price) + (o.hasRefri ? (o.refriQty * o.refriPrice) : 0);
+        const val = (o.qty * o.price);
         if (o.status === 'pendente'){
           if (!map[o.client]) map[o.client] = 0;
           map[o.client] += val;
@@ -404,38 +397,26 @@
 
     /* ---------- events ---------- */
     document.addEventListener('DOMContentLoaded', ()=>{
-      // set default date to today
       $('#date').valueAsDate = new Date();
-
+      // set unitPrice based on selected item
+      updateUnitPriceFromItem();
       renderList();
 
-      // handle refri toggles
-      $('#hasRefri').addEventListener('change', (e)=>{
-        const on = e.target.checked;
-        $('#refriQty').disabled = !on;
-        $('#refriPrice').disabled = !on;
-        if(!on){
-          $('#refriQty').value = 0;
-          $('#refriPrice').value = '0.00';
-        } else {
-          $('#refriQty').value = 1;
-          $('#refriPrice').value = '5.00';
-        }
-      });
+      $('#item').addEventListener('change', updateUnitPriceFromItem);
+      $('#qty').addEventListener('input', updateQuickTotal);
+      $('#unitPrice').addEventListener('input', updateQuickTotal);
 
-      // submit form
+      // submit
       $('#orderForm').addEventListener('submit', (ev)=>{
         ev.preventDefault();
+        const itemSel = $('#item').value.split('|'); // ["Name","price"]
         const data = {
           date: $('#date').value,
           seller: $('#seller').value || '—',
           client: $('#client').value || '',
-          item: $('#item').value || '—',
+          itemName: itemSel[0],
           qty: $('#qty').value,
-          price: $('#price').value,
-          hasRefri: $('#hasRefri').checked,
-          refriQty: $('#refriQty').value,
-          refriPrice: $('#refriPrice').value,
+          unitPrice: $('#unitPrice').value,
           status: $('#status').value
         };
         const orders = loadOrders();
@@ -444,19 +425,17 @@
         saveOrders(orders);
         renderList(currentFilter, $('#search').value);
         toast('Venda adicionada!');
-        sendNotification(`Nova venda: ${order.item}`, `Vendedor: ${order.seller} — ${order.qty}x — ${order.client || 'Cliente não informado'}`);
+        sendNotification(`Nova venda: ${order.itemName}`, `Vendedor: ${order.seller} — ${order.qty}x — ${order.client || 'Cliente não informado'}`);
         $('#orderForm').reset();
         $('#date').valueAsDate = new Date();
-        $('#refriQty').disabled = true;
-        $('#refriPrice').disabled = true;
+        updateUnitPriceFromItem();
       });
 
-      // clear form
+      // clear
       $('#clearForm').addEventListener('click', ()=>{
         $('#orderForm').reset();
         $('#date').valueAsDate = new Date();
-        $('#refriQty').disabled = true;
-        $('#refriPrice').disabled = true;
+        updateUnitPriceFromItem();
       });
 
       // list actions (delegate)
@@ -478,6 +457,9 @@
           saveOrders(list);
           renderList(currentFilter, $('#search').value);
           toast('Pedido marcado como pago');
+        } else if(action === 'sendGroup'){
+          const order = loadOrders().find(x=> x.id === id);
+          if(order) sendOrderToGroup(order);
         }
       });
 
@@ -496,65 +478,7 @@
         renderList(currentFilter, e.target.value);
       });
 
-      // export CSV
-      $('#exportCsv').addEventListener('click', ()=>{
-        const list = loadOrders();
-        if (!list.length) { toast('Sem dados para exportar'); return; }
-        const headers = ['id','date','seller','client','item','qty','price','hasRefri','refriQty','refriPrice','status','createdAt'];
-        const csv = [headers.join(',')].concat(list.map(o => headers.map(h => JSON.stringify(o[h] ?? '')).join(','))).join('\\n');
-        const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'vendas_pastel_export.csv';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-        toast('Exportado CSV');
-      });
-
-      // import CSV
-      $('#importBtn').addEventListener('click', ()=> $('#importFile').click());
-      $('#importFile').addEventListener('change', async (e)=>{
-        const f = e.target.files[0];
-        if(!f) return;
-        const txt = await f.text();
-        try {
-          const lines = txt.split(/\\r?\\n/).filter(Boolean);
-          const headers = lines.shift().split(',').map(h=>h.trim().replaceAll('"',''));
-          const out = lines.map(l=>{
-            // naive CSV parse (works with our exported format)
-            const cols = JSON.parse('[' + l + ']');
-            const obj = {};
-            headers.forEach((h,i)=> obj[h]=cols[i]);
-            // type conversions
-            obj.qty = Number(obj.qty) || 0;
-            obj.price = Number(obj.price) || 0;
-            obj.hasRefri = (obj.hasRefri === 'true' || obj.hasRefri === true);
-            obj.refriQty = Number(obj.refriQty) || 0;
-            obj.refriPrice = Number(obj.refriPrice) || 0;
-            return obj;
-          });
-          saveOrders(out);
-          renderList(currentFilter, $('#search').value);
-          toast('Importado com sucesso');
-        } catch(err){
-          console.error(err);
-          alert('Erro ao importar. CSV com formato inesperado.');
-        }
-        e.target.value = '';
-      });
-
-      // clear all
-      $('#clearAll').addEventListener('click', ()=>{
-        if (!confirm('Apagar todos os registros? Esta ação não pode ser desfeita.')) return;
-        localStorage.removeItem(STORAGE_KEY);
-        renderList(currentFilter, $('#search').value);
-        toast('Todos os dados apagados');
-      });
-
-      // notification permission button
+      // notif permission
       $('#notifPerm').addEventListener('click', async ()=>{
         if (!('Notification' in window)) {
           alert('Notificações não suportadas neste navegador.');
@@ -564,34 +488,56 @@
         if (p === 'granted') toast('Notificações ativadas');
         else toast('Permissão não concedida');
       });
-
-      // click outside to close toasts? not necessary
     });
 
     // current filter
     let currentFilter = 'all';
 
+    /* ---------- total preview ---------- */
+    function updateUnitPriceFromItem(){
+      const sel = $('#item').value;
+      const parts = sel.split('|');
+      const price = Number(parts[1] || 0).toFixed(2);
+      $('#unitPrice').value = price;
+      updateQuickTotal();
+    }
+    function updateQuickTotal(){
+      const qty = Number($('#qty').value) || 0;
+      const price = Number($('#unitPrice').value) || 0;
+      $('#quickTotal').textContent = `Total do item: R$ ${fmt(qty * price)}`;
+    }
+
+    /* ---------- send to group ---------- */
+    function sendOrderToGroup(order){
+      const val = (order.qty * order.price);
+      const msg =
+`🍽 *NOVA VENDA - PASTELARIA*
+👤 *Vendedor:* ${order.seller}
+📅 *Data:* ${formatDateBR(order.date)}
+
+🍽 *Item:* ${order.item}
+Quantidade: ${order.qty}
+Valor unit.: R$ ${fmt(order.price)}
+
+💰 *Total:* R$ ${fmt(val)}
+Cliente: ${order.client || '-'}`;
+
+      // Open wa.me with message. The user will need to choose the group link in WhatsApp app.
+      // We include the group invite link inside the message to make it easy to open the group.
+      const textWithLink = msg + "\n\nLink do grupo: " + WHATSAPP_GROUP_LINK;
+      window.open(`https://wa.me/?text=${encodeURIComponent(textWithLink)}&app_absent=0`);
+    }
+
     /* ---------- notifications ---------- */
     function sendNotification(title, body){
-      // visual toast always
       toast(body.length > 60 ? (body.slice(0,60)+'...') : body);
       if (window.Notification && Notification.permission === 'granted'){
         try {
           const n = new Notification(title, {body, icon: null});
-          // optional: close after 4s
           setTimeout(()=> n.close(), 4000);
         } catch(e){}
       }
     }
-
-    /* ---------- small safe CSV JSON parse helper (already used) ---------- */
-    // Extra: format currency in inputs on blur
-    document.body.addEventListener('blur', (e)=>{
-      if (e.target && (e.target.id === 'price' || e.target.id === 'refriPrice')){
-        const v = Number(e.target.value || 0).toFixed(2);
-        e.target.value = v;
-      }
-    }, true);
   </script>
 </body>
 </html>
