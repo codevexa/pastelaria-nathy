@@ -1,153 +1,230 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>Registro de Vendas - Pastéis</title>
-    <style>
+<meta charset="UTF-8">
+<title>Carrinho de Pastéis</title>
 
-        body {
-            font-family: Arial, sans-serif;
-            background: #0a1a2b;
-            margin: 0;
-            padding: 0;
-            color: white;
-        }
+<style>
+    body {
+        background: #0a1a2b;
+        font-family: Arial;
+        margin: 0;
+        padding: 0;
+        color: white;
+    }
 
-        .container {
-            max-width: 420px;
-            margin: auto;
-            margin-top: 20px;
-            background: #112233;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.3);
-        }
+    .container {
+        max-width: 430px;
+        margin: auto;
+        background: #13294b;
+        margin-top: 20px;
+        padding: 20px;
+        border-radius: 12px;
+    }
 
-        h2 {
-            text-align: center;
-            color: #4da3ff;
-            margin-bottom: 20px;
-        }
+    h2 {
+        text-align: center;
+        color: #4da3ff;
+        margin-bottom: 15px;
+    }
 
-        label {
-            display: block;
-            margin-top: 15px;
-            font-weight: bold;
-            font-size: 14px;
-        }
+    label {
+        display: block;
+        margin-top: 12px;
+        font-weight: bold;
+        font-size: 14px;
+    }
 
-        select, input {
-            width: 100%;
-            padding: 12px;
-            margin-top: 5px;
-            border-radius: 8px;
-            border: none;
-            background: #dfe6ee;
-            font-size: 15px;
-        }
+    select, input {
+        width: 100%;
+        padding: 12px;
+        border-radius: 8px;
+        border: none;
+        background: #dfebff;
+        margin-top: 5px;
+        font-size: 15px;
+    }
 
-        button {
-            width: 100%;
-            background: #4da3ff;
-            margin-top: 20px;
-            padding: 13px;
-            font-size: 17px;
-            font-weight: bold;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            color: white;
-        }
+    button {
+        width: 100%;
+        padding: 14px;
+        background: #4da3ff;
+        color: white;
+        border: none;
+        margin-top: 18px;
+        font-size: 17px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+    }
 
-        button:hover {
-            background: #3b8bdd;
-        }
+    button:hover {
+        background: #3c8bdd;
+    }
 
-        .ok {
-            background: #d4ffe0;
-            color: #0a2e12;
-            padding: 12px;
-            border-left: 4px solid #2ecc71;
-            margin-top: 15px;
-            border-radius: 6px;
-        }
+    .item {
+        background: #1c3b66;
+        padding: 12px;
+        border-radius: 10px;
+        margin-top: 10px;
+    }
 
-    </style>
+    .remove-btn {
+        background: #ff4d4d;
+        padding: 6px 10px;
+        border: none;
+        border-radius: 6px;
+        margin-top: 8px;
+        cursor: pointer;
+        color: white;
+        font-weight: bold;
+    }
+
+    .total-box {
+        background: #0f2038;
+        padding: 15px;
+        border-radius: 10px;
+        margin-top: 15px;
+        font-size: 18px;
+        text-align: center;
+        font-weight: bold;
+        color: #4da3ff;
+    }
+</style>
+
 </head>
 <body>
 
 <div class="container">
-    <h2>Registro de Vendas</h2>
+
+    <h2>Venda de Pastéis</h2>
 
     <label>Vendedor</label>
     <select id="vendedor">
-        <option value="Juan">Juan</option>
-        <option value="Jean">Jean</option>
-        <option value="Nathy">Nathy</option>
+        <option>Juan</option>
+        <option>Jean</option>
+        <option>Nathy</option>
     </select>
 
     <label>Cliente</label>
     <input type="text" id="cliente" placeholder="Nome do cliente">
 
-    <label>Produto</label>
-    <select id="produto">
-        <option value="">Selecione o pastel</option>
-        <option value="Carne c/ requeijão">Carne c/ requeijão</option>
-        <option value="Frango c/ requeijão">Frango c/ requeijão</option>
-        <option value="Carne c/ requeijão + Cheddar">Carne c/ requeijão + Cheddar</option>
-        <option value="Frango c/ requeijão + Cheddar">Frango c/ requeijão + Cheddar</option>
+    <label>Sabor</label>
+    <select id="sabor">
+        <option>Carne</option>
+        <option>Frango</option>
     </select>
 
-    <label>Adicionar bebida?</label>
-    <select id="refri">
-        <option value="Sem refri">Sem refri</option>
-        <option value="Com refri (200ml)">Com refri (200ml)</option>
+    <label>Recheio</label>
+    <select id="recheio">
+        <option>Requeijão</option>
+        <option>Cheddar</option>
     </select>
 
-    <label>Valor</label>
-    <input type="number" id="valor" placeholder="Ex: 10.00">
+    <label>Qtd. Pastéis (R$ 10,00)</label>
+    <input type="number" id="qtdPastel" value="1" min="1">
 
-    <button onclick="enviar()">Registrar Venda</button>
+    <label>Qtd. Refri (R$ 2,00)</label>
+    <input type="number" id="qtdRefri" value="0" min="0">
 
-    <div id="msg"></div>
+    <button onclick="adicionarCarrinho()">Adicionar ao Carrinho</button>
+
+    <h3 style="margin-top:25px; color:#4da3ff;">Carrinho</h3>
+    <div id="carrinho"></div>
+
+    <div class="total-box">
+        Total: R$ <span id="totalGeral">0.00</span>
+    </div>
+
+    <button id="btnEnviar" onclick="enviarGrupo()">Enviar (Total: R$ 0,00)</button>
+
 </div>
 
 <script>
-function enviar() {
-    const vendedor = document.getElementById("vendedor").value;
-    const cliente  = document.getElementById("cliente").value;
-    const produto  = document.getElementById("produto").value;
-    const refri    = document.getElementById("refri").value;
-    const valor    = document.getElementById("valor").value;
+let itens = [];
+const grupoLink = "https://chat.whatsapp.com/C8Vb1Y84j5S8goJxCTcg0Q";
 
-    if (!cliente || !produto || !valor) {
-        alert("Preencha todos os campos!");
+function atualizarTotal() {
+    let total = itens.reduce((soma, item) => soma + item.total, 0);
+    document.getElementById("totalGeral").innerText = total.toFixed(2);
+    document.getElementById("btnEnviar").innerText =
+        `Enviar (Total: R$ ${total.toFixed(2)})`;
+}
+
+function adicionarCarrinho() {
+    const sabor = document.getElementById("sabor").value;
+    const recheio = document.getElementById("recheio").value;
+    const qtdPastel = parseInt(document.getElementById("qtdPastel").value);
+    const qtdRefri = parseInt(document.getElementById("qtdRefri").value);
+
+    const total = qtdPastel * 10 + qtdRefri * 2;
+
+    const item = {
+        sabor,
+        recheio,
+        qtdPastel,
+        qtdRefri,
+        total
+    };
+
+    itens.push(item);
+    renderizarCarrinho();
+    atualizarTotal();
+}
+
+function removerItem(i) {
+    itens.splice(i, 1);
+    renderizarCarrinho();
+    atualizarTotal();
+}
+
+function renderizarCarrinho() {
+    const box = document.getElementById("carrinho");
+    box.innerHTML = "";
+
+    itens.forEach((item, i) => {
+        box.innerHTML += `
+        <div class="item">
+            <strong>${item.sabor} c/ ${item.recheio}</strong><br>
+            Pastéis: ${item.qtdPastel} = R$ ${(item.qtdPastel * 10).toFixed(2)}<br>
+            Refri: ${item.qtdRefri} = R$ ${(item.qtdRefri * 2).toFixed(2)}<br>
+            <strong>Total: R$ ${item.total.toFixed(2)}</strong><br>
+            <button class="remove-btn" onclick="removerItem(${i})">Remover</button>
+        </div>`;
+    });
+}
+
+function enviarGrupo() {
+    const cliente = document.getElementById("cliente").value;
+    const vendedor = document.getElementById("vendedor").value;
+
+    if (!cliente) {
+        alert("Digite o nome do cliente!");
         return;
     }
 
-    fetch("https://script.google.com/macros/s/AKfycbzLLe3rEgwqZDbUcQ2dIINwjJo-mCcTuCZeKARMa4pwM8zAI3sSQ48pv_eMdlWVdiaP/exec", {
-        method: "POST",
-        body: JSON.stringify({
-            vendedor: vendedor,
-            cliente: cliente,
-            produto: produto + " - " + refri,
-            valor: valor
-        }),
-        headers: {
-            "Content-Type": "application/json"
-        }
-    })
-    .then(res => res.text())
-    .then(data => {
-        document.getElementById("msg").innerHTML =
-            `<div class="ok">✔ Venda registrada com sucesso!</div>`;
+    if (itens.length === 0) {
+        alert("O carrinho está vazio!");
+        return;
+    }
 
-        document.getElementById("cliente").value = "";
-        document.getElementById("produto").value = "";
-        document.getElementById("valor").value = "";
-        document.getElementById("refri").value = "Sem refri";
-    })
-    .catch(err => alert("Erro ao enviar: " + err));
+    let msg = `🍽 *Pedido de Pastéis*\n👤 *Cliente:* ${cliente}\n🧑‍💼 *Vendedor:* ${vendedor}\n\n`;
+
+    itens.forEach((item, i) => {
+        msg += `*Item ${i+1}:*\n` +
+               `🥟 ${item.sabor} c/ ${item.recheio}\n` +
+               `Qtd Pastéis: ${item.qtdPastel} (R$ ${(item.qtdPastel * 10).toFixed(2)})\n` +
+               `Refri: ${item.qtdRefri} (R$ ${(item.qtdRefri * 2).toFixed(2)})\n` +
+               `➡ Total item: R$ ${item.total.toFixed(2)}\n\n`;
+    });
+
+    const totalFinal = itens.reduce((soma, item) => soma + item.total, 0);
+
+    msg += `💰 *Total Geral: R$ ${totalFinal.toFixed(2)}*`;
+
+    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}&link=${encodeURIComponent(grupoLink)}`;
+
+    window.open(url, "_blank");
 }
 </script>
 
