@@ -2,7 +2,11 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Carrinho de Pastéis</title>
+<title>Venda de Pastéis</title>
+
+<link rel="manifest" href="manifest.json">
+
+<meta name="theme-color" content="#0a1a2b">
 
 <style>
     body {
@@ -10,16 +14,19 @@
         font-family: Arial;
         margin: 0;
         padding: 0;
-        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 100vh;
     }
 
     .container {
+        width: 100%;
         max-width: 430px;
-        margin: auto;
         background: #13294b;
-        margin-top: 20px;
         padding: 20px;
         border-radius: 12px;
+        margin-top: 20px;
     }
 
     h2 {
@@ -33,6 +40,7 @@
         margin-top: 12px;
         font-weight: bold;
         font-size: 14px;
+        color: white;
     }
 
     select, input {
@@ -56,10 +64,34 @@
         border-radius: 8px;
         cursor: pointer;
         font-weight: bold;
+        transition: 0.2s;
     }
 
-    button:hover {
-        background: #3c8bdd;
+    /* Animação pulse */
+    .pulse {
+        animation: pulseAnim 0.4s ease;
+    }
+
+    @keyframes pulseAnim {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.08); }
+        100% { transform: scale(1); }
+    }
+
+    /* Pop-up de adicionado */
+    #popup {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #2ecc71;
+        color: white;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-weight: bold;
+        display: none;
+        box-shadow: 0 0 10px black;
+        z-index: 9999;
     }
 
     .item {
@@ -67,6 +99,7 @@
         padding: 12px;
         border-radius: 10px;
         margin-top: 10px;
+        color: white;
     }
 
     .remove-btn {
@@ -95,6 +128,8 @@
 </head>
 <body>
 
+<div id="popup">Item adicionado!</div>
+
 <div class="container">
 
     <h2>Venda de Pastéis</h2>
@@ -122,12 +157,18 @@
     </select>
 
     <label>Qtd. Pastéis (R$ 10,00)</label>
-    <input type="number" id="qtdPastel" value="1" min="1">
+    <select id="qtdPastel">
+        <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+        <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
+    </select>
 
-    <label>Qtd. Refri (R$ 2,00)</label>
-    <input type="number" id="qtdRefri" value="0" min="0">
+    <label>Refrigerante (+ R$ 2,00)</label>
+    <select id="refri">
+        <option value="0">Não</option>
+        <option value="2">Sim</option>
+    </select>
 
-    <button onclick="adicionarCarrinho()">Adicionar ao Carrinho</button>
+    <button id="btnAdd" onclick="adicionarCarrinho()">Adicionar ao Carrinho</button>
 
     <h3 style="margin-top:25px; color:#4da3ff;">Carrinho</h3>
     <div id="carrinho"></div>
@@ -142,34 +183,40 @@
 
 <script>
 let itens = [];
-const grupoLink = "https://chat.whatsapp.com/C8Vb1Y84j5S8goJxCTcg0Q";
+const grupo = "https://chat.whatsapp.com/C8Vb1Y84j5S8goJxCTcg0Q";
+
+function showPopup() {
+    const popup = document.getElementById("popup");
+    popup.style.display = "block";
+
+    setTimeout(() => { popup.style.display = "none"; }, 1300);
+}
 
 function atualizarTotal() {
-    let total = itens.reduce((soma, item) => soma + item.total, 0);
+    let total = itens.reduce((s, item) => s + item.total, 0);
     document.getElementById("totalGeral").innerText = total.toFixed(2);
-    document.getElementById("btnEnviar").innerText =
-        `Enviar (Total: R$ ${total.toFixed(2)})`;
+    document.getElementById("btnEnviar").innerText = `Enviar (Total: R$ ${total.toFixed(2)})`;
 }
 
 function adicionarCarrinho() {
     const sabor = document.getElementById("sabor").value;
     const recheio = document.getElementById("recheio").value;
-    const qtdPastel = parseInt(document.getElementById("qtdPastel").value);
-    const qtdRefri = parseInt(document.getElementById("qtdRefri").value);
+    const qtdPastel = Number(document.getElementById("qtdPastel").value);
+    const refri = Number(document.getElementById("refri").value);
 
-    const total = qtdPastel * 10 + qtdRefri * 2;
+    const total = qtdPastel * 10 + refri;
 
-    const item = {
-        sabor,
-        recheio,
-        qtdPastel,
-        qtdRefri,
-        total
-    };
+    itens.push({ sabor, recheio, qtdPastel, refri, total });
 
-    itens.push(item);
     renderizarCarrinho();
     atualizarTotal();
+
+    // ANIMAÇÃO
+    const btn = document.getElementById("btnAdd");
+    btn.classList.add("pulse");
+    setTimeout(() => btn.classList.remove("pulse"), 400);
+
+    showPopup();
 }
 
 function removerItem(i) {
@@ -187,7 +234,7 @@ function renderizarCarrinho() {
         <div class="item">
             <strong>${item.sabor} c/ ${item.recheio}</strong><br>
             Pastéis: ${item.qtdPastel} = R$ ${(item.qtdPastel * 10).toFixed(2)}<br>
-            Refri: ${item.qtdRefri} = R$ ${(item.qtdRefri * 2).toFixed(2)}<br>
+            Refri: ${item.refri > 0 ? "Sim (R$ 2,00)" : "Não"}<br>
             <strong>Total: R$ ${item.total.toFixed(2)}</strong><br>
             <button class="remove-btn" onclick="removerItem(${i})">Remover</button>
         </div>`;
@@ -198,33 +245,30 @@ function enviarGrupo() {
     const cliente = document.getElementById("cliente").value;
     const vendedor = document.getElementById("vendedor").value;
 
-    if (!cliente) {
-        alert("Digite o nome do cliente!");
-        return;
-    }
-
-    if (itens.length === 0) {
-        alert("O carrinho está vazio!");
-        return;
-    }
+    if (!cliente) return alert("Digite o nome do cliente!");
+    if (itens.length === 0) return alert("Adicione itens ao carrinho!");
 
     let msg = `🍽 *Pedido de Pastéis*\n👤 *Cliente:* ${cliente}\n🧑‍💼 *Vendedor:* ${vendedor}\n\n`;
 
     itens.forEach((item, i) => {
         msg += `*Item ${i+1}:*\n` +
                `🥟 ${item.sabor} c/ ${item.recheio}\n` +
-               `Qtd Pastéis: ${item.qtdPastel} (R$ ${(item.qtdPastel * 10).toFixed(2)})\n` +
-               `Refri: ${item.qtdRefri} (R$ ${(item.qtdRefri * 2).toFixed(2)})\n` +
-               `➡ Total item: R$ ${item.total.toFixed(2)}\n\n`;
+               `Pastéis: ${item.qtdPastel}\n` +
+               `Refri: ${item.refri > 0 ? "Sim (+ R$ 2,00)" : "Não"}\n` +
+               `➡ Total: R$ ${item.total.toFixed(2)}\n\n`;
     });
 
-    const totalFinal = itens.reduce((soma, item) => soma + item.total, 0);
-
+    const totalFinal = itens.reduce((s, item) => s + item.total, 0);
     msg += `💰 *Total Geral: R$ ${totalFinal.toFixed(2)}*`;
 
-    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}&link=${encodeURIComponent(grupoLink)}`;
+    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}&link=${encodeURIComponent(grupo)}`;
 
     window.open(url, "_blank");
+}
+
+// === REGISTRA SERVICE WORKER (PWA) ===
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js");
 }
 </script>
 
