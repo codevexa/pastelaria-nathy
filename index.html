@@ -1,237 +1,565 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pedidos de Pastel</title>
-
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Pedidos — Pastelaria (Integrado)</title>
 <style>
-    body {
-        margin: 0;
-        background: #0A1A2F;
-        font-family: Arial, sans-serif;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        color: white;
-    }
+  :root{
+    --bg:#0f1724;
+    --card:#102544;
+    --muted:#98a0b3;
+    --accent:#22c55e;
+    --primary:#1A73E8;
+    --glass: rgba(255,255,255,0.03);
+    --text:#e6eef8;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background: linear-gradient(180deg,#071025 0%, #081226 60%);
+    color:var(--text);
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:18px;
+  }
 
-    .card {
-        background: #102544;
-        width: 92%;
-        max-width: 450px;
-        padding: 20px;
-        border-radius: 14px;
-        box-shadow: 0 0 12px rgba(0,0,0,0.4);
-        text-align: center;
-    }
+  .card {
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    width:100%;
+    max-width:900px;
+    border-radius:12px;
+    padding:16px;
+    display:grid;
+    grid-template-columns: 420px 1fr;
+    gap:16px;
+    box-shadow: 0 8px 30px rgba(2,6,23,0.6);
+    border:1px solid rgba(255,255,255,0.03);
+  }
 
-    h2 {
-        margin-top: 0;
-        font-size: 22px;
-    }
+  h2{margin:0 0 10px 0;font-size:18px}
+  label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+  input[type="text"], select, textarea {
+    width:100%;
+    padding:10px 12px;
+    border-radius:8px;
+    border:1px solid rgba(255,255,255,0.04);
+    background:var(--glass);
+    color:var(--text);
+    margin-bottom:12px;
+    outline:none;
+    font-size:14px;
+  }
 
-    label {
-        display: block;
-        margin-top: 12px;
-        font-size: 16px;
-        text-align: left;
-    }
+  .small{font-size:13px;padding:8px 10px;border-radius:8px}
+  .btn{
+    display:inline-block;padding:10px 12px;border-radius:8px;background:var(--accent);color:#062014;font-weight:700;border:none;cursor:pointer;
+  }
+  .btn.gray{background:transparent;color:var(--text);border:1px solid rgba(255,255,255,0.05)}
 
-    select {
-        width: 100%;
-        padding: 12px;
-        border-radius: 8px;
-        border: none;
-        margin-top: 6px;
-    }
+  .panel-left{padding-right:6px}
+  .panel-right{padding-left:6px}
 
-    .pastelBox {
-        background: #0C1C33;
-        padding: 12px;
-        border-radius: 10px;
-        margin-top: 12px;
-    }
+  .pastelBox{background:#0c1c33;padding:10px;border-radius:8px;margin-bottom:8px}
+  .pastelBox b{display:block;margin-bottom:8px}
 
-    #totalBox {
-        background: #08131f;
-        padding: 12px;
-        margin-top: 15px;
-        border-radius: 8px;
-        font-size: 20px;
-        font-weight: bold;
-    }
+  #carrinhoList{display:flex;flex-direction:column;gap:8px;max-height:60vh;overflow:auto;padding:6px}
 
-    button {
-        width: 100%;
-        padding: 14px;
-        border: none;
-        background: #1A73E8;
-        color: white;
-        border-radius: 8px;
-        font-weight: bold;
-        margin-top: 20px;
-        font-size: 17px;
-    }
+  /* kitchen animation */
+  .k-card{background:#071a35;padding:10px;border-radius:8px;color:var(--text);border:1px solid rgba(255,255,255,0.03);opacity:0; transform: translateX(-30px); animation: slideIn 420ms forwards;}
+  @keyframes slideIn{to{opacity:1; transform:none;}}
+
+  .order-actions{display:flex;gap:8px;align-items:center}
+  .badge{padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.03);color:var(--muted);font-size:12px}
+
+  .total-box{background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.007));padding:12px;border-radius:8px;text-align:center;font-weight:700}
+
+  /* modal edit */
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:9999}
+  .modal.open{display:flex}
+  .modal .box{background:var(--card);padding:16px;border-radius:10px;width:92%;max-width:520px}
+
+  /* responsive */
+  @media (max-width:920px){
+    .card{grid-template-columns:1fr;max-width:420px}
+  }
 </style>
-
 </head>
 <body>
+  <div class="card">
+    <!-- LEFT: form -->
+    <div class="panel-left">
+      <h2>Registrar Venda — Pastel</h2>
 
-<div class="card">
+      <label>Cliente</label>
+      <input type="text" id="client" placeholder="Nome do cliente (opcional)">
 
-    <h2>🍽️ Pedido de Pastéis</h2>
+      <label>Vendedor</label>
+      <select id="seller">
+        <option>Juan</option>
+        <option>Jean</option>
+        <option>Nathy</option>
+      </select>
 
-    <!-- Vendedor -->
-    <label>Vendedor</label>
-    <select id="vendedor">
-        <option value="Juan">Juan</option>
-        <option value="Jean">Jean</option>
-        <option value="Nathy">Nathy</option>
-    </select>
+      <label>Quantidade de Pastéis</label>
+      <select id="qty" onchange="renderPastels()">
+        <option value="1">1</option><option value="2">2</option><option value="3">3</option>
+        <option value="4">4</option><option value="5">5</option><option value="6">6</option>
+        <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+        <option value="10">10</option>
+      </select>
 
-    <!-- Quantidade -->
-    <label>Quantidade de Pastéis</label>
-    <select id="qtd" onchange="gerarPastelBoxes()">
-        <option value="1">1 pastel</option>
-        <option value="2">2 pastéis</option>
-        <option value="3">3 pastéis</option>
-        <option value="4">4 pastéis</option>
-        <option value="5">5 pastéis</option>
-        <option value="6">6 pastéis</option>
-        <option value="7">7 pastéis</option>
-        <option value="8">8 pastéis</option>
-        <option value="9">9 pastéis</option>
-        <option value="10">10 pastéis</option>
-    </select>
+      <div id="pastelsArea"></div>
 
-    <!-- Pastéis individuais -->
-    <div id="pastelContainer"></div>
-
-    <!-- Refrigerante -->
-    <label>Refrigerante?</label>
-    <select id="refri" onchange="mostrarRefriQtd(); atualizarTotal();">
+      <label>Refrigerante?</label>
+      <select id="hasRefri" onchange="toggleRefri()">
         <option value="nao">Não</option>
-        <option value="sim">Sim (+2,00)</option>
-    </select>
+        <option value="sim">Sim (+ R$2,00 cada)</option>
+      </select>
 
-    <!-- Quantidade Refri -->
-    <div id="refriBox" style="display:none;">
-        <label>Quantidade de Refri</label>
-        <select id="refriQtd" onchange="atualizarTotal()">
-            <option value="1">1 refri</option>
-            <option value="2">2 refri</option>
-            <option value="3">3 refri</option>
-            <option value="4">4 refri</option>
+      <div id="refriArea" style="display:none">
+        <label>Quantidade de refri</label>
+        <select id="refriQty">
+          <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
         </select>
+      </div>
+
+      <label>Pago?</label>
+      <select id="paid">
+        <option>Sim</option>
+        <option>Não</option>
+      </select>
+
+      <label>Observações (opcional)</label>
+      <textarea id="notes" placeholder="Observações rápidas..." rows="3" style="width:100%;border-radius:8px;padding:8px;background:var(--glass);color:var(--text)"></textarea>
+
+      <div style="display:flex;gap:10px;margin-top:6px">
+        <button class="btn" onclick="addOrder()">Adicionar e Enviar</button>
+        <button class="btn gray" onclick="clearForm()">Limpar</button>
+      </div>
+
+      <div style="margin-top:12px" class="total-box" id="previewTotal">Total: R$ 10,00</div>
+      <div style="margin-top:8px;color:var(--muted);font-size:13px">Salvo online na planilha + localmente no navegador</div>
     </div>
 
-    <!-- Pago -->
-    <label>Pago?</label>
-    <select id="pago" onchange="atualizarTotal()">
-        <option value="Sim">Sim</option>
-        <option value="Não">Não</option>
-    </select>
+    <!-- RIGHT: kitchen / histórico + edição -->
+    <div class="panel-right">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <h2>Histórico / Cozinha</h2>
+          <div style="color:var(--muted);font-size:13px">Pedidos do dia (visual)</div>
+        </div>
+        <div class="order-actions">
+          <button class="small" onclick="loadFromSheet()">Atualizar (Sheets)</button>
+          <button class="small gray" onclick="clearAllLocal()">Limpar locais</button>
+        </div>
+      </div>
 
-    <!-- Total -->
-    <div id="totalBox">Total: R$ 10,00</div>
+      <div id="carrinhoList"></div>
 
-    <button onclick="enviar()">Enviar Pedido</button>
+      <h3 style="margin-top:12px">Editar venda</h3>
+      <div style="color:var(--muted);font-size:13px;margin-bottom:8px">Clique em editar em um pedido</div>
 
-</div>
+    </div>
+  </div>
+
+  <!-- edit modal -->
+  <div class="modal" id="editModal">
+    <div class="box">
+      <h3>Editar Pedido</h3>
+      <div id="editForm"></div>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn" onclick="saveEdit()">Salvar</button>
+        <button class="btn gray" onclick="closeEdit()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- toast -->
+  <div id="toast" style="position:fixed;right:18px;bottom:18px;background:#0b1530;padding:10px;border-radius:8px;display:none;color:var(--text)"></div>
 
 <script>
+/* ---------- config ---------- */
+const SHEET_WEBHOOK = "https://script.google.com/macros/s/AKfycbxf3FwD7zlIZYqxIFm9_J21A5GOY8ssP0qdWRaBmCZSP3Z7tOSpJL01vdZbEHZhPBCk/exec";
+const STORAGE_KEY = 'pastel_vendas_v2';
+let orders = []; // loaded from localStorage
 
-function gerarPastelBoxes() {
-    let qtd = Number(document.getElementById("qtd").value);
-    let container = document.getElementById("pastelContainer");
+/* ---------- helpers ---------- */
+const $ = sel => document.querySelector(sel);
+const toast = (t) => {
+  const el = $('#toast'); el.textContent = t; el.style.display='block';
+  setTimeout(()=> el.style.display='none', 2200);
+};
+const genId = ()=> 'o'+Date.now().toString(36)+(Math.random().toString(36).slice(2,7));
 
-    container.innerHTML = "";
+/* ---------- render pastels inputs ---------- */
+function renderPastels(){
+  const qty = Number($('#qty').value);
+  const area = $('#pastelsArea');
+  area.innerHTML = '';
+  for(let i=1;i<=qty;i++){
+    area.innerHTML += `
+      <div class="pastelBox" data-i="${i}">
+        <b>Pastel ${i}</b>
+        <label>Sabor</label>
+        <select id="sabor${i}">
+          <option>Carne</option><option>Frango</option>
+        </select>
+        <label>Recheio</label>
+        <select id="recheio${i}">
+          <option>Requeijão</option><option>Cheddar</option>
+        </select>
+      </div>
+    `;
+  }
+  atualizarPreviewTotal();
+}
 
-    for (let i = 1; i <= qtd; i++) {
-        container.innerHTML += `
-            <div class="pastelBox">
-                <b>Pastel ${i}</b>
+/* ---------- refri toggle ---------- */
+function toggleRefri(){
+  const v = $('#hasRefri').value;
+  $('#refriArea').style.display = v === 'sim' ? 'block' : 'none';
+  atualizarPreviewTotal();
+}
 
-                <label>Sabor</label>
-                <select id="sabor${i}" onchange="atualizarTotal()">
-                    <option value="Carne">Carne</option>
-                    <option value="Frango">Frango</option>
-                </select>
+/* ---------- total calc ---------- */
+function atualizarPreviewTotal(){
+  const qty = Number($('#qty').value);
+  const hasRefri = $('#hasRefri').value === 'sim';
+  const refriQty = hasRefri ? Number($('#refriQty').value) : 0;
+  const total = (qty * 10) + (refriQty * 2);
+  $('#previewTotal').textContent = `Total: R$ ${total.toFixed(2)}`;
+}
 
-                <label>Recheio</label>
-                <select id="recheio${i}" onchange="atualizarTotal()">
-                    <option value="Requeijão">Requeijão</option>
-                    <option value="Cheddar">Cheddar</option>
-                </select>
-            </div>
-        `;
+/* ---------- local storage ---------- */
+function loadLocal(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    orders = raw ? JSON.parse(raw) : [];
+  }catch(e){ orders = [];}
+}
+function saveLocal(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(orders)); }
+
+/* ---------- UI: render orders list (kitchen visual) ---------- */
+function renderOrders(){
+  const list = $('#carrinhoList');
+  list.innerHTML = '';
+  // show newest first
+  const show = orders.slice().reverse();
+  if(!show.length){
+    list.innerHTML = `<div style="color:var(--muted)">Nenhum pedido local. Use "Atualizar (Sheets)" para puxar pedidos do servidor.</div>`;
+    return;
+  }
+  show.forEach(o=>{
+    const div = document.createElement('div');
+    div.className = 'k-card';
+    div.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:start">
+        <div>
+          <div style="font-weight:700">${o.client || 'Cliente não informado'}</div>
+          <div class="badge" style="margin-top:6px">${o.vendedor} • ${o.date}</div>
+        </div>
+        <div class="order-actions">
+          <button class="small" onclick="openEdit('${o.id}')">Editar</button>
+          <button class="small gray" onclick="markDone('${o.id}')">Concluir</button>
+        </div>
+      </div>
+      <div style="margin-top:8px;color:var(--muted);white-space:pre-wrap">${o.summary}</div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+/* ---------- create summary text from order obj ---------- */
+function buildSummary(order){
+  let s = '';
+  (order.items || []).forEach((it, idx)=>{
+    s += `Pastel ${idx+1}: ${it.sabor} / ${it.recheio} — qtd ${it.qtd}\n`;
+  });
+  s += `Refri: ${order.refri ? ('Sim x'+order.refriQty) : 'Não'}\n`;
+  s += `Pago: ${order.paid}\n`;
+  return s;
+}
+
+/* ---------- add order ---------- */
+async function addOrder(){
+  // gather form
+  const id = genId();
+  const client = $('#client').value || '';
+  const vendedor = $('#seller').value;
+  const qty = Number($('#qty').value);
+  const items = [];
+  for(let i=1;i<=qty;i++){
+    items.push({
+      sabor: $(`#sabor${i}`).value,
+      recheio: $(`#recheio${i}`).value,
+      qtd: 1
+    });
+  }
+  const refri = $('#hasRefri').value === 'sim';
+  const refriQty = refri ? Number($('#refriQty').value) : 0;
+  const paid = $('#paid').value;
+  const notes = $('#notes').value || '';
+  const total = (qty * 10) + (refriQty * 2);
+  const date = new Date().toLocaleString();
+
+  const order = {
+    id, date, client, vendedor, items, qty, refri, refriQty, paid, notes, total,
+    status: 'pending',
+    summary: buildSummary({items,refri,refriQty,paid})
+  };
+
+  // save locally
+  orders.push(order);
+  saveLocal();
+  renderOrders();
+  toast('Pedido salvo localmente');
+
+  // send to sheet
+  sendToSheet({ action:'create', order }).then(()=> {
+    toast('Enviado para planilha');
+  }).catch(err=>{
+    console.warn('Erro ao enviar para sheet', err);
+    toast('Erro ao enviar para planilha (ver console)');
+  });
+
+  // send to whatsapp group
+  sendToWhats(order);
+  clearForm();
+}
+
+/* ---------- send to sheet (POST) ---------- */
+async function sendToSheet(payload){
+  // payload: { action: 'create'|'update', order: {...} }
+  try{
+    await fetch(SHEET_WEBHOOK, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
+      // note: if CORS issues appear, you may need to set Apps Script to allow proper origin or use mode:'no-cors'
+    });
+  }catch(e){
+    throw e;
+  }
+}
+
+/* ---------- send to whatsapp group ---------- */
+function sendToWhats(order){
+  let msg = `🔥 *NOVO PEDIDO* 🔥\n👤 *Cliente:* ${order.client || '-'}\n🧑‍🍳 *Vendedor:* ${order.vendedor}\n\n`;
+  order.items.forEach((it, i)=>{
+    msg += `*Pastel ${i+1}*: ${it.sabor} c/ ${it.recheio}\n`;
+  });
+  msg += `\n🥤 Refri: ${order.refri ? order.refriQty : 'Não'}\n💵 Pago: ${order.paid}\n💰 Total: R$ ${order.total.toFixed(2)}\n\n📌 Pedido gerado pelo sistema.`;
+  const groupLink = "https://chat.whatsapp.com/C8Vb1Y84j5S8goJxCTcg0Q";
+  const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}&link=${encodeURIComponent(groupLink)}`;
+  window.open(url,'_blank');
+}
+
+/* ---------- utilities: clear form ---------- */
+function clearForm(){
+  $('#client').value=''; $('#qty').value='1'; $('#hasRefri').value='nao'; $('#refriQty').value='1';
+  $('#paid').value='Não'; $('#notes').value=''; renderPastels(); toggleRefri(); atualizarPreviewTotal();
+}
+
+/* ---------- load from sheet (optional) ---------- */
+async function loadFromSheet(){
+  toast('Buscando planilha...');
+  try{
+    // Try to fetch list via GET — requires doGet on your Apps Script returning JSON
+    const res = await fetch(SHEET_WEBHOOK + '?action=list');
+    const data = await res.json();
+    // expect data.orders = []
+    if(Array.isArray(data.orders)){
+      // map remote into local list (avoid duplicates by id)
+      data.orders.forEach(ro=>{
+        // if not present locally, push
+        if(!orders.find(x=>x.id === ro.id)){
+          // normalize remote row to our schema (depends on how your script returns)
+          const o = {
+            id: ro.id || genId(),
+            date: ro.date || (new Date()).toLocaleString(),
+            client: ro.client || '',
+            vendedor: ro.vendedor || '',
+            items: ro.items || [],
+            qty: ro.qty || (ro.items ? ro.items.length : 1),
+            refri: !!ro.refri,
+            refriQty: ro.refriQty || 0,
+            paid: ro.paid || 'Não',
+            notes: ro.notes || '',
+            total: Number(ro.total) || 0,
+            status: ro.status || 'pending',
+            summary: ro.summary || ''
+          };
+          orders.push(o);
+        }
+      });
+      saveLocal();
+      renderOrders();
+      toast('Pedidos atualizados do Sheets');
+    } else {
+      toast('Resposta inesperada do Sheets');
     }
-
-    atualizarTotal();
+  }catch(e){
+    console.warn(e);
+    toast('Erro ao buscar planilha (veja console)');
+  }
 }
 
-function mostrarRefriQtd() {
-    let refri = document.getElementById("refri").value;
-    document.getElementById("refriBox").style.display = refri === "sim" ? "block" : "none";
+/* ---------- edit order ---------- */
+let editingId = null;
+function openEdit(id){
+  const o = orders.find(x=>x.id===id);
+  if(!o) return toast('Pedido não encontrado');
+  editingId = id;
+  const f = $('#editForm');
+  f.innerHTML = `
+    <label>Cliente</label><input id="e_client" value="${escapeHtml(o.client)}">
+    <label>Vendedor</label>
+    <select id="e_seller">
+      <option ${o.vendedor==='Juan'?'selected':''}>Juan</option>
+      <option ${o.vendedor==='Jean'?'selected':''}>Jean</option>
+      <option ${o.vendedor==='Nathy'?'selected':''}>Nathy</option>
+    </select>
+    <label>Quantidade</label>
+    <select id="e_qty" onchange="renderEditPastels()">
+      ${[...Array(10)].map((_,i)=>`<option value="${i+1}" ${o.qty==i+1?'selected':''}>${i+1}</option>`).join('')}
+    </select>
+    <div id="e_pastelsArea"></div>
+    <label>Refrigerante?</label>
+    <select id="e_refri" onchange="renderEditRefri()">
+      <option value="nao" ${o.refri? '': 'selected'}>Não</option>
+      <option value="sim" ${o.refri? 'selected': ''}>Sim</option>
+    </select>
+    <div id="e_refriBox" style="display:none"><label>Qtde Refri</label>
+      <select id="e_refriQty">
+        <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
+      </select>
+    </div>
+    <label>Pago?</label>
+    <select id="e_paid"><option ${o.paid==='Sim'?'selected':''}>Sim</option><option ${o.paid==='Não'?'selected':''}>Não</option></select>
+    <label>Observações</label><textarea id="e_notes" rows="3">${escapeHtml(o.notes)}</textarea>
+  `;
+  // store initial items into a temp place for render
+  $('#editModal').classList.add('open');
+  // set initial values
+  setTimeout(()=> {
+    $('#e_qty').value = o.qty;
+    if(o.refri){ $('#e_refri').value='sim'; $('#e_refriBox').style.display='block'; $('#e_refriQty').value = o.refriQty; }
+    renderEditPastels();
+    atualizarEditTotal();
+  },50);
 }
 
-function atualizarTotal() {
-    let qtdPastel = Number(document.getElementById("qtd").value);
-    let refri = document.getElementById("refri").value;
-    let refriQtd = refri === "sim" ? Number(document.getElementById("refriQtd").value) : 0;
-
-    let total = (qtdPastel * 10) + (refriQtd * 2);
-
-    document.getElementById("totalBox").innerHTML = "Total: R$ " + total.toFixed(2);
+function renderEditPastels(){
+  const qty = Number($('#e_qty').value);
+  const area = $('#e_pastelsArea');
+  const o = orders.find(x=>x.id===editingId);
+  area.innerHTML = '';
+  for(let i=1;i<=qty;i++){
+    const it = (o.items[i-1] || {sabor:'Carne',recheio:'Requeijão'});
+    area.innerHTML += `
+      <div class="pastelBox">
+        <b>Pastel ${i}</b>
+        <label>Sabor</label>
+        <select id="e_sabor${i}">
+          <option ${it.sabor==='Carne'?'selected':''}>Carne</option>
+          <option ${it.sabor==='Frango'?'selected':''}>Frango</option>
+        </select>
+        <label>Recheio</label>
+        <select id="e_recheio${i}">
+          <option ${it.recheio==='Requeijão'?'selected':''}>Requeijão</option>
+          <option ${it.recheio==='Cheddar'?'selected':''}>Cheddar</option>
+        </select>
+      </div>
+    `;
+  }
 }
 
-function enviar() {
-    let vendedor = document.getElementById("vendedor").value;
-    let qtd = Number(document.getElementById("qtd").value);
-
-    let detalhes = "";
-
-    for (let i = 1; i <= qtd; i++) {
-        let sabor = document.getElementById("sabor" + i).value;
-        let recheio = document.getElementById("recheio" + i).value;
-
-        detalhes += `
-🍽️ *Pastel ${i}*
-➡️ Sabor: ${sabor}
-➡️ Recheio: ${recheio}
-
-`;
-    }
-
-    let refri = document.getElementById("refri").value;
-    let refriQtd = refri === "sim" ? document.getElementById("refriQtd").value : "0";
-
-    let pago = document.getElementById("pago").value;
-
-    let total = document.getElementById("totalBox").innerText.replace("Total: R$ ", "");
-
-    let mensagem = 
-`🔥 *NOVO PEDIDO* 🔥
-👤 *Vendedor:* ${vendedor}
-
-${detalhes}
-🥤 *Refrigerante:* ${refri === "sim" ? refriQtd : "Não"}
-
-💵 *Pago:* ${pago}
-💰 *Total:* R$ ${total}
-
-📌 Enviado automaticamente.`;
-
-    let url = "https://wa.me/?text=" + encodeURIComponent(mensagem);
-
-    window.open(url, "_blank");
+function renderEditRefri(){
+  if($('#e_refri').value==='sim') { $('#e_refriBox').style.display='block'; } else { $('#e_refriBox').style.display='none'; }
+  atualizarEditTotal();
 }
 
-window.onload = gerarPastelBoxes;
+function atualizarEditTotal(){
+  const qty = Number($('#e_qty').value);
+  const refri = $('#e_refri').value === 'sim';
+  const refriQty = refri ? Number($('#e_refriQty').value) : 0;
+  const total = (qty * 10) + (refriQty * 2);
+  // show small toast / or update modal header (skip for brevity)
+  return total;
+}
 
+function saveEdit(){
+  const o = orders.find(x=>x.id===editingId);
+  if(!o) return;
+  o.client = $('#e_client').value || '';
+  o.vendedor = $('#e_seller').value;
+  const qty = Number($('#e_qty').value);
+  o.qty = qty;
+  o.items = [];
+  for(let i=1;i<=qty;i++){
+    o.items.push({ sabor: $(`#e_sabor${i}`).value, recheio: $(`#e_recheio${i}`).value, qtd:1 });
+  }
+  o.refri = $('#e_refri').value === 'sim';
+  o.refriQty = o.refri ? Number($('#e_refriQty').value) : 0;
+  o.paid = $('#e_paid').value;
+  o.notes = $('#e_notes').value || '';
+  o.total = atualizarEditTotal();
+  o.summary = buildSummary(o);
+  saveLocal();
+  renderOrders();
+  closeEdit();
+  toast('Pedido atualizado localmente');
+
+  // send update to sheet (requires server support)
+  sendToSheet({ action:'update', order:o }).then(()=>{
+    toast('Atualização enviada ao Sheets');
+  }).catch(e=> {
+    console.warn(e);
+    toast('Erro ao enviar atualização (ver console)');
+  });
+}
+
+function closeEdit(){ $('#editModal').classList.remove('open'); editingId = null; }
+
+/* ---------- mark done (visual) ---------- */
+function markDone(id){
+  // visual only: fade out and remove from local list
+  const idx = orders.findIndex(x=>x.id===id);
+  if(idx===-1) return;
+  orders.splice(idx,1);
+  saveLocal();
+  renderOrders();
+  toast('Pedido marcado como concluído (local)');
+  // optionally tell sheet: status change
+  // sendToSheet({action:'status', order:{id, status:'done'}});
+}
+
+/* ---------- clear local ---------- */
+function clearAllLocal(){
+  if(!confirm('Apagar todos os pedidos locais? (Isso não apaga a planilha)')) return;
+  orders = []; saveLocal(); renderOrders(); toast('Pedidos locais apagados');
+}
+
+/* ---------- escapeHtml ---------- */
+function escapeHtml(s){ return String(s||'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+
+/* ---------- init ---------- */
+function init(){
+  renderPastels();
+  loadLocal();
+  renderOrders();
+  // preview total bindings
+  $('#qty').addEventListener('change', atualizarPreviewTotal);
+  $('#refriQty').addEventListener('change', atualizarPreviewTotal);
+  $('#hasRefri').addEventListener('change', atualizarPreviewTotal);
+}
+init();
+
+/* ---------- Optional: if you want to auto-poll sheet for new orders, you can setInterval(loadFromSheet, 30000) */
 </script>
-
 </body>
 </html>
