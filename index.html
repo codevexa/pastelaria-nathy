@@ -1,565 +1,440 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Pedidos — Pastelaria (Integrado)</title>
-<style>
-  :root{
-    --bg:#0f1724;
-    --card:#102544;
-    --muted:#98a0b3;
-    --accent:#22c55e;
-    --primary:#1A73E8;
-    --glass: rgba(255,255,255,0.03);
-    --text:#e6eef8;
-  }
-  *{box-sizing:border-box}
-  body{
-    margin:0;
-    font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-    background: linear-gradient(180deg,#071025 0%, #081226 60%);
-    color:var(--text);
-    min-height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:18px;
-  }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BUSCAR EXPRESS - Cooperativa de Motoqueiros</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  .card {
-    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    width:100%;
-    max-width:900px;
-    border-radius:12px;
-    padding:16px;
-    display:grid;
-    grid-template-columns: 420px 1fr;
-    gap:16px;
-    box-shadow: 0 8px 30px rgba(2,6,23,0.6);
-    border:1px solid rgba(255,255,255,0.03);
-  }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #1e293b;
+            background: white;
+        }
 
-  h2{margin:0 0 10px 0;font-size:18px}
-  label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
-  input[type="text"], select, textarea {
-    width:100%;
-    padding:10px 12px;
-    border-radius:8px;
-    border:1px solid rgba(255,255,255,0.04);
-    background:var(--glass);
-    color:var(--text);
-    margin-bottom:12px;
-    outline:none;
-    font-size:14px;
-  }
+        .header {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
 
-  .small{font-size:13px;padding:8px 10px;border-radius:8px}
-  .btn{
-    display:inline-block;padding:10px 12px;border-radius:8px;background:var(--accent);color:#062014;font-weight:700;border:none;cursor:pointer;
-  }
-  .btn.gray{background:transparent;color:var(--text);border:1px solid rgba(255,255,255,0.05)}
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-  .panel-left{padding-right:6px}
-  .panel-right{padding-left:6px}
+        .logo {
+            font-size: 1.75rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
 
-  .pastelBox{background:#0c1c33;padding:10px;border-radius:8px;margin-bottom:8px}
-  .pastelBox b{display:block;margin-bottom:8px}
+        .logo-buscar {
+            color: #fbbf24;
+        }
 
-  #carrinhoList{display:flex;flex-direction:column;gap:8px;max-height:60vh;overflow:auto;padding:6px}
+        .nav {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
 
-  /* kitchen animation */
-  .k-card{background:#071a35;padding:10px;border-radius:8px;color:var(--text);border:1px solid rgba(255,255,255,0.03);opacity:0; transform: translateX(-30px); animation: slideIn 420ms forwards;}
-  @keyframes slideIn{to{opacity:1; transform:none;}}
+        .nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
 
-  .order-actions{display:flex;gap:8px;align-items:center}
-  .badge{padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.03);color:var(--muted);font-size:12px}
+        .nav a:hover {
+            color: #fbbf24;
+        }
 
-  .total-box{background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.007));padding:12px;border-radius:8px;text-align:center;font-weight:700}
+        .hero {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            padding: 5rem 2rem;
+            text-align: center;
+        }
 
-  /* modal edit */
-  .modal{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:none;align-items:center;justify-content:center;z-index:9999}
-  .modal.open{display:flex}
-  .modal .box{background:var(--card);padding:16px;border-radius:10px;width:92%;max-width:520px}
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
 
-  /* responsive */
-  @media (max-width:920px){
-    .card{grid-template-columns:1fr;max-width:420px}
-  }
-</style>
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            line-height: 1.1;
+        }
+
+        .hero-highlight {
+            color: #fbbf24;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: #fbbf24;
+            color: #1e293b;
+        }
+
+        .btn-primary:hover {
+            background: #f59e0b;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(251, 191, 36, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #1e40af;
+        }
+
+        .btn-secondary:hover {
+            background: #f1f5f9;
+            transform: translateY(-2px);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 5rem 2rem;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 3rem;
+            color: #1e40af;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .service-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(30, 64, 175, 0.15);
+            border-color: #fbbf24;
+        }
+
+        .service-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .service-card h3 {
+            font-size: 1.5rem;
+            color: #1e40af;
+            margin-bottom: 1rem;
+        }
+
+        .service-card p {
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        .stats {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            padding: 4rem 2rem;
+        }
+
+        .stats-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            text-align: center;
+        }
+
+        .stat-item h3 {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #fbbf24;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-item p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .cta-section {
+            background: #fbbf24;
+            padding: 5rem 2rem;
+            text-align: center;
+        }
+
+        .cta-section h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #1e40af;
+            margin-bottom: 1rem;
+        }
+
+        .cta-section p {
+            font-size: 1.2rem;
+            color: #1e293b;
+            margin-bottom: 2rem;
+        }
+
+        .footer {
+            background: #0f172a;
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+        }
+
+        .footer p {
+            opacity: 0.7;
+        }
+
+        @media (max-width: 768px) {
+            .nav {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .services-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="card">
-    <!-- LEFT: form -->
-    <div class="panel-left">
-      <h2>Registrar Venda — Pastel</h2>
-
-      <label>Cliente</label>
-      <input type="text" id="client" placeholder="Nome do cliente (opcional)">
-
-      <label>Vendedor</label>
-      <select id="seller">
-        <option>Juan</option>
-        <option>Jean</option>
-        <option>Nathy</option>
-      </select>
-
-      <label>Quantidade de Pastéis</label>
-      <select id="qty" onchange="renderPastels()">
-        <option value="1">1</option><option value="2">2</option><option value="3">3</option>
-        <option value="4">4</option><option value="5">5</option><option value="6">6</option>
-        <option value="7">7</option><option value="8">8</option><option value="9">9</option>
-        <option value="10">10</option>
-      </select>
-
-      <div id="pastelsArea"></div>
-
-      <label>Refrigerante?</label>
-      <select id="hasRefri" onchange="toggleRefri()">
-        <option value="nao">Não</option>
-        <option value="sim">Sim (+ R$2,00 cada)</option>
-      </select>
-
-      <div id="refriArea" style="display:none">
-        <label>Quantidade de refri</label>
-        <select id="refriQty">
-          <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
-        </select>
-      </div>
-
-      <label>Pago?</label>
-      <select id="paid">
-        <option>Sim</option>
-        <option>Não</option>
-      </select>
-
-      <label>Observações (opcional)</label>
-      <textarea id="notes" placeholder="Observações rápidas..." rows="3" style="width:100%;border-radius:8px;padding:8px;background:var(--glass);color:var(--text)"></textarea>
-
-      <div style="display:flex;gap:10px;margin-top:6px">
-        <button class="btn" onclick="addOrder()">Adicionar e Enviar</button>
-        <button class="btn gray" onclick="clearForm()">Limpar</button>
-      </div>
-
-      <div style="margin-top:12px" class="total-box" id="previewTotal">Total: R$ 10,00</div>
-      <div style="margin-top:8px;color:var(--muted);font-size:13px">Salvo online na planilha + localmente no navegador</div>
-    </div>
-
-    <!-- RIGHT: kitchen / histórico + edição -->
-    <div class="panel-right">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div>
-          <h2>Histórico / Cozinha</h2>
-          <div style="color:var(--muted);font-size:13px">Pedidos do dia (visual)</div>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <span class="logo-buscar">BUSCAR</span> EXPRESS
+            </div>
+            <nav>
+                <ul class="nav">
+                    <li><a href="#servicos">Serviços</a></li>
+                    <li><a href="#vantagens">Vantagens</a></li>
+                    <li><a href="#estatisticas">Estatísticas</a></li>
+                    <li><a href="#contato">Contato</a></li>
+                </ul>
+            </nav>
         </div>
-        <div class="order-actions">
-          <button class="small" onclick="loadFromSheet()">Atualizar (Sheets)</button>
-          <button class="small gray" onclick="clearAllLocal()">Limpar locais</button>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>
+                Entregas <span class="hero-highlight">Rápidas</span> e Seguras com a BUSCAR EXPRESS
+            </h1>
+            <p>
+                A cooperativa de motoqueiros que conecta você ao destino com velocidade, segurança e profissionalismo
+            </p>
+            <div class="btn-group">
+                <a href="#contato" class="btn btn-primary">Solicitar Entrega</a>
+                <a href="#vantagens" class="btn btn-secondary">Seja um Cooperado</a>
+            </div>
         </div>
-      </div>
+    </section>
 
-      <div id="carrinhoList"></div>
-
-      <h3 style="margin-top:12px">Editar venda</h3>
-      <div style="color:var(--muted);font-size:13px;margin-bottom:8px">Clique em editar em um pedido</div>
-
-    </div>
-  </div>
-
-  <!-- edit modal -->
-  <div class="modal" id="editModal">
-    <div class="box">
-      <h3>Editar Pedido</h3>
-      <div id="editForm"></div>
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <button class="btn" onclick="saveEdit()">Salvar</button>
-        <button class="btn gray" onclick="closeEdit()">Cancelar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- toast -->
-  <div id="toast" style="position:fixed;right:18px;bottom:18px;background:#0b1530;padding:10px;border-radius:8px;display:none;color:var(--text)"></div>
-
-<script>
-/* ---------- config ---------- */
-const SHEET_WEBHOOK = "https://script.google.com/macros/s/AKfycbxf3FwD7zlIZYqxIFm9_J21A5GOY8ssP0qdWRaBmCZSP3Z7tOSpJL01vdZbEHZhPBCk/exec";
-const STORAGE_KEY = 'pastel_vendas_v2';
-let orders = []; // loaded from localStorage
-
-/* ---------- helpers ---------- */
-const $ = sel => document.querySelector(sel);
-const toast = (t) => {
-  const el = $('#toast'); el.textContent = t; el.style.display='block';
-  setTimeout(()=> el.style.display='none', 2200);
-};
-const genId = ()=> 'o'+Date.now().toString(36)+(Math.random().toString(36).slice(2,7));
-
-/* ---------- render pastels inputs ---------- */
-function renderPastels(){
-  const qty = Number($('#qty').value);
-  const area = $('#pastelsArea');
-  area.innerHTML = '';
-  for(let i=1;i<=qty;i++){
-    area.innerHTML += `
-      <div class="pastelBox" data-i="${i}">
-        <b>Pastel ${i}</b>
-        <label>Sabor</label>
-        <select id="sabor${i}">
-          <option>Carne</option><option>Frango</option>
-        </select>
-        <label>Recheio</label>
-        <select id="recheio${i}">
-          <option>Requeijão</option><option>Cheddar</option>
-        </select>
-      </div>
-    `;
-  }
-  atualizarPreviewTotal();
-}
-
-/* ---------- refri toggle ---------- */
-function toggleRefri(){
-  const v = $('#hasRefri').value;
-  $('#refriArea').style.display = v === 'sim' ? 'block' : 'none';
-  atualizarPreviewTotal();
-}
-
-/* ---------- total calc ---------- */
-function atualizarPreviewTotal(){
-  const qty = Number($('#qty').value);
-  const hasRefri = $('#hasRefri').value === 'sim';
-  const refriQty = hasRefri ? Number($('#refriQty').value) : 0;
-  const total = (qty * 10) + (refriQty * 2);
-  $('#previewTotal').textContent = `Total: R$ ${total.toFixed(2)}`;
-}
-
-/* ---------- local storage ---------- */
-function loadLocal(){
-  try{
-    const raw = localStorage.getItem(STORAGE_KEY);
-    orders = raw ? JSON.parse(raw) : [];
-  }catch(e){ orders = [];}
-}
-function saveLocal(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(orders)); }
-
-/* ---------- UI: render orders list (kitchen visual) ---------- */
-function renderOrders(){
-  const list = $('#carrinhoList');
-  list.innerHTML = '';
-  // show newest first
-  const show = orders.slice().reverse();
-  if(!show.length){
-    list.innerHTML = `<div style="color:var(--muted)">Nenhum pedido local. Use "Atualizar (Sheets)" para puxar pedidos do servidor.</div>`;
-    return;
-  }
-  show.forEach(o=>{
-    const div = document.createElement('div');
-    div.className = 'k-card';
-    div.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:start">
-        <div>
-          <div style="font-weight:700">${o.client || 'Cliente não informado'}</div>
-          <div class="badge" style="margin-top:6px">${o.vendedor} • ${o.date}</div>
+    <!-- Services Section -->
+    <section id="servicos" class="container">
+        <h2 class="section-title">Nossos Serviços</h2>
+        <div class="services-grid">
+            <div class="service-card">
+                <div class="service-icon">🏍️</div>
+                <h3>Entregas Expressas</h3>
+                <p>Entregas rápidas em até 2 horas na região metropolitana. Ideal para documentos, pequenos volumes e urgências.</p>
+            </div>
+            <div class="service-card">
+                <div class="service-icon">📦</div>
+                <h3>Logística Urbana</h3>
+                <p>Soluções completas de logística para empresas, com rotas otimizadas e rastreamento em tempo real.</p>
+            </div>
+            <div class="service-card">
+                <div class="service-icon">🍕</div>
+                <h3>Delivery de Alimentos</h3>
+                <p>Parceria com restaurantes e estabelecimentos para entregas de refeições com segurança e agilidade.</p>
+            </div>
+            <div class="service-card">
+                <div class="service-icon">💼</div>
+                <h3>Entregas Corporativas</h3>
+                <p>Serviço dedicado para empresas com necessidades recorrentes de entregas e coletas programadas.</p>
+            </div>
+            <div class="service-card">
+                <div class="service-icon">🔒</div>
+                <h3>Entregas Seguras</h3>
+                <p>Transporte de itens valiosos e sensíveis com protocolos especiais de segurança e confidencialidade.</p>
+            </div>
+            <div class="service-card">
+                <div class="service-icon">⚡</div>
+                <h3>Disponibilidade 24h</h3>
+                <p>Atendimento e entregas disponíveis 24 horas por dia, 7 dias por semana para suas emergências.</p>
+            </div>
         </div>
-        <div class="order-actions">
-          <button class="small" onclick="openEdit('${o.id}')">Editar</button>
-          <button class="small gray" onclick="markDone('${o.id}')">Concluir</button>
+    </section>
+
+    <!-- Stats Section -->
+    <section id="estatisticas" class="stats">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <h3>500+</h3>
+                <p>Motoqueiros Cooperados</p>
+            </div>
+            <div class="stat-item">
+                <h3>10mil+</h3>
+                <p>Entregas Mensais</p>
+            </div>
+            <div class="stat-item">
+                <h3>98%</h3>
+                <p>Satisfação dos Clientes</p>
+            </div>
+            <div class="stat-item">
+                <h3>5 anos</h3>
+                <p>de Experiência</p>
+            </div>
         </div>
-      </div>
-      <div style="margin-top:8px;color:var(--muted);white-space:pre-wrap">${o.summary}</div>
-    `;
-    list.appendChild(div);
-  });
-}
+    </section>
 
-/* ---------- create summary text from order obj ---------- */
-function buildSummary(order){
-  let s = '';
-  (order.items || []).forEach((it, idx)=>{
-    s += `Pastel ${idx+1}: ${it.sabor} / ${it.recheio} — qtd ${it.qtd}\n`;
-  });
-  s += `Refri: ${order.refri ? ('Sim x'+order.refriQty) : 'Não'}\n`;
-  s += `Pago: ${order.paid}\n`;
-  return s;
-}
+    <!-- Vantagens Section -->
+    <section id="vantagens" class="container">
+        <h2 class="section-title">Por que escolher a BUSCAR EXPRESS?</h2>
+        <div class="services-grid">
+            <div class="service-card">
+                <div class="service-icon">✓</div>
+                <h3>Profissionais Qualificados</h3>
+                <p>Todos os nossos motoqueiros são treinados, habilitados e comprometidos com a excelência no atendimento.</p>
+            </div>
+            <div class="service-card">
+                <div class="service-icon">📍</div>
+                <h3>Rastreamento Real-Time</h3>
+                <p>Acompanhe sua entrega em tempo real através do nosso sistema de rastreamento online.</p>
+            </div>
+            <div class="service-card">
+                <div class="service-icon">💰</div>
+                <h3>Preços Justos</h3>
+                <p>Como cooperativa, garantimos preços competitivos e justos tanto para clientes quanto para cooperados.</p>
+            </div>
+        </div>
+    </section>
 
-/* ---------- add order ---------- */
-async function addOrder(){
-  // gather form
-  const id = genId();
-  const client = $('#client').value || '';
-  const vendedor = $('#seller').value;
-  const qty = Number($('#qty').value);
-  const items = [];
-  for(let i=1;i<=qty;i++){
-    items.push({
-      sabor: $(`#sabor${i}`).value,
-      recheio: $(`#recheio${i}`).value,
-      qtd: 1
-    });
-  }
-  const refri = $('#hasRefri').value === 'sim';
-  const refriQty = refri ? Number($('#refriQty').value) : 0;
-  const paid = $('#paid').value;
-  const notes = $('#notes').value || '';
-  const total = (qty * 10) + (refriQty * 2);
-  const date = new Date().toLocaleString();
+    <!-- CTA Section -->
+    <section id="contato" class="cta-section">
+        <h2>Pronto para começar?</h2>
+        <p>Entre em contato conosco e descubra como podemos ajudar você</p>
+        <div class="btn-group">
+            <a href="tel:+5511999999999" class="btn btn-primary">Ligar Agora</a>
+            <a href="https://wa.me/5511999999999" class="btn btn-secondary">WhatsApp</a>
+        </div>
+    </section>
 
-  const order = {
-    id, date, client, vendedor, items, qty, refri, refriQty, paid, notes, total,
-    status: 'pending',
-    summary: buildSummary({items,refri,refriQty,paid})
-  };
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 BUSCAR EXPRESS - Cooperativa de Motoqueiros. Todos os direitos reservados.</p>
+    </footer>
 
-  // save locally
-  orders.push(order);
-  saveLocal();
-  renderOrders();
-  toast('Pedido salvo localmente');
+    <script>
+        // Smooth scroll para links internos
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
 
-  // send to sheet
-  sendToSheet({ action:'create', order }).then(()=> {
-    toast('Enviado para planilha');
-  }).catch(err=>{
-    console.warn('Erro ao enviar para sheet', err);
-    toast('Erro ao enviar para planilha (ver console)');
-  });
+        // Animação simples ao scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
 
-  // send to whatsapp group
-  sendToWhats(order);
-  clearForm();
-}
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
 
-/* ---------- send to sheet (POST) ---------- */
-async function sendToSheet(payload){
-  // payload: { action: 'create'|'update', order: {...} }
-  try{
-    await fetch(SHEET_WEBHOOK, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(payload)
-      // note: if CORS issues appear, you may need to set Apps Script to allow proper origin or use mode:'no-cors'
-    });
-  }catch(e){
-    throw e;
-  }
-}
-
-/* ---------- send to whatsapp group ---------- */
-function sendToWhats(order){
-  let msg = `🔥 *NOVO PEDIDO* 🔥\n👤 *Cliente:* ${order.client || '-'}\n🧑‍🍳 *Vendedor:* ${order.vendedor}\n\n`;
-  order.items.forEach((it, i)=>{
-    msg += `*Pastel ${i+1}*: ${it.sabor} c/ ${it.recheio}\n`;
-  });
-  msg += `\n🥤 Refri: ${order.refri ? order.refriQty : 'Não'}\n💵 Pago: ${order.paid}\n💰 Total: R$ ${order.total.toFixed(2)}\n\n📌 Pedido gerado pelo sistema.`;
-  const groupLink = "https://chat.whatsapp.com/C8Vb1Y84j5S8goJxCTcg0Q";
-  const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}&link=${encodeURIComponent(groupLink)}`;
-  window.open(url,'_blank');
-}
-
-/* ---------- utilities: clear form ---------- */
-function clearForm(){
-  $('#client').value=''; $('#qty').value='1'; $('#hasRefri').value='nao'; $('#refriQty').value='1';
-  $('#paid').value='Não'; $('#notes').value=''; renderPastels(); toggleRefri(); atualizarPreviewTotal();
-}
-
-/* ---------- load from sheet (optional) ---------- */
-async function loadFromSheet(){
-  toast('Buscando planilha...');
-  try{
-    // Try to fetch list via GET — requires doGet on your Apps Script returning JSON
-    const res = await fetch(SHEET_WEBHOOK + '?action=list');
-    const data = await res.json();
-    // expect data.orders = []
-    if(Array.isArray(data.orders)){
-      // map remote into local list (avoid duplicates by id)
-      data.orders.forEach(ro=>{
-        // if not present locally, push
-        if(!orders.find(x=>x.id === ro.id)){
-          // normalize remote row to our schema (depends on how your script returns)
-          const o = {
-            id: ro.id || genId(),
-            date: ro.date || (new Date()).toLocaleString(),
-            client: ro.client || '',
-            vendedor: ro.vendedor || '',
-            items: ro.items || [],
-            qty: ro.qty || (ro.items ? ro.items.length : 1),
-            refri: !!ro.refri,
-            refriQty: ro.refriQty || 0,
-            paid: ro.paid || 'Não',
-            notes: ro.notes || '',
-            total: Number(ro.total) || 0,
-            status: ro.status || 'pending',
-            summary: ro.summary || ''
-          };
-          orders.push(o);
-        }
-      });
-      saveLocal();
-      renderOrders();
-      toast('Pedidos atualizados do Sheets');
-    } else {
-      toast('Resposta inesperada do Sheets');
-    }
-  }catch(e){
-    console.warn(e);
-    toast('Erro ao buscar planilha (veja console)');
-  }
-}
-
-/* ---------- edit order ---------- */
-let editingId = null;
-function openEdit(id){
-  const o = orders.find(x=>x.id===id);
-  if(!o) return toast('Pedido não encontrado');
-  editingId = id;
-  const f = $('#editForm');
-  f.innerHTML = `
-    <label>Cliente</label><input id="e_client" value="${escapeHtml(o.client)}">
-    <label>Vendedor</label>
-    <select id="e_seller">
-      <option ${o.vendedor==='Juan'?'selected':''}>Juan</option>
-      <option ${o.vendedor==='Jean'?'selected':''}>Jean</option>
-      <option ${o.vendedor==='Nathy'?'selected':''}>Nathy</option>
-    </select>
-    <label>Quantidade</label>
-    <select id="e_qty" onchange="renderEditPastels()">
-      ${[...Array(10)].map((_,i)=>`<option value="${i+1}" ${o.qty==i+1?'selected':''}>${i+1}</option>`).join('')}
-    </select>
-    <div id="e_pastelsArea"></div>
-    <label>Refrigerante?</label>
-    <select id="e_refri" onchange="renderEditRefri()">
-      <option value="nao" ${o.refri? '': 'selected'}>Não</option>
-      <option value="sim" ${o.refri? 'selected': ''}>Sim</option>
-    </select>
-    <div id="e_refriBox" style="display:none"><label>Qtde Refri</label>
-      <select id="e_refriQty">
-        <option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option>
-      </select>
-    </div>
-    <label>Pago?</label>
-    <select id="e_paid"><option ${o.paid==='Sim'?'selected':''}>Sim</option><option ${o.paid==='Não'?'selected':''}>Não</option></select>
-    <label>Observações</label><textarea id="e_notes" rows="3">${escapeHtml(o.notes)}</textarea>
-  `;
-  // store initial items into a temp place for render
-  $('#editModal').classList.add('open');
-  // set initial values
-  setTimeout(()=> {
-    $('#e_qty').value = o.qty;
-    if(o.refri){ $('#e_refri').value='sim'; $('#e_refriBox').style.display='block'; $('#e_refriQty').value = o.refriQty; }
-    renderEditPastels();
-    atualizarEditTotal();
-  },50);
-}
-
-function renderEditPastels(){
-  const qty = Number($('#e_qty').value);
-  const area = $('#e_pastelsArea');
-  const o = orders.find(x=>x.id===editingId);
-  area.innerHTML = '';
-  for(let i=1;i<=qty;i++){
-    const it = (o.items[i-1] || {sabor:'Carne',recheio:'Requeijão'});
-    area.innerHTML += `
-      <div class="pastelBox">
-        <b>Pastel ${i}</b>
-        <label>Sabor</label>
-        <select id="e_sabor${i}">
-          <option ${it.sabor==='Carne'?'selected':''}>Carne</option>
-          <option ${it.sabor==='Frango'?'selected':''}>Frango</option>
-        </select>
-        <label>Recheio</label>
-        <select id="e_recheio${i}">
-          <option ${it.recheio==='Requeijão'?'selected':''}>Requeijão</option>
-          <option ${it.recheio==='Cheddar'?'selected':''}>Cheddar</option>
-        </select>
-      </div>
-    `;
-  }
-}
-
-function renderEditRefri(){
-  if($('#e_refri').value==='sim') { $('#e_refriBox').style.display='block'; } else { $('#e_refriBox').style.display='none'; }
-  atualizarEditTotal();
-}
-
-function atualizarEditTotal(){
-  const qty = Number($('#e_qty').value);
-  const refri = $('#e_refri').value === 'sim';
-  const refriQty = refri ? Number($('#e_refriQty').value) : 0;
-  const total = (qty * 10) + (refriQty * 2);
-  // show small toast / or update modal header (skip for brevity)
-  return total;
-}
-
-function saveEdit(){
-  const o = orders.find(x=>x.id===editingId);
-  if(!o) return;
-  o.client = $('#e_client').value || '';
-  o.vendedor = $('#e_seller').value;
-  const qty = Number($('#e_qty').value);
-  o.qty = qty;
-  o.items = [];
-  for(let i=1;i<=qty;i++){
-    o.items.push({ sabor: $(`#e_sabor${i}`).value, recheio: $(`#e_recheio${i}`).value, qtd:1 });
-  }
-  o.refri = $('#e_refri').value === 'sim';
-  o.refriQty = o.refri ? Number($('#e_refriQty').value) : 0;
-  o.paid = $('#e_paid').value;
-  o.notes = $('#e_notes').value || '';
-  o.total = atualizarEditTotal();
-  o.summary = buildSummary(o);
-  saveLocal();
-  renderOrders();
-  closeEdit();
-  toast('Pedido atualizado localmente');
-
-  // send update to sheet (requires server support)
-  sendToSheet({ action:'update', order:o }).then(()=>{
-    toast('Atualização enviada ao Sheets');
-  }).catch(e=> {
-    console.warn(e);
-    toast('Erro ao enviar atualização (ver console)');
-  });
-}
-
-function closeEdit(){ $('#editModal').classList.remove('open'); editingId = null; }
-
-/* ---------- mark done (visual) ---------- */
-function markDone(id){
-  // visual only: fade out and remove from local list
-  const idx = orders.findIndex(x=>x.id===id);
-  if(idx===-1) return;
-  orders.splice(idx,1);
-  saveLocal();
-  renderOrders();
-  toast('Pedido marcado como concluído (local)');
-  // optionally tell sheet: status change
-  // sendToSheet({action:'status', order:{id, status:'done'}});
-}
-
-/* ---------- clear local ---------- */
-function clearAllLocal(){
-  if(!confirm('Apagar todos os pedidos locais? (Isso não apaga a planilha)')) return;
-  orders = []; saveLocal(); renderOrders(); toast('Pedidos locais apagados');
-}
-
-/* ---------- escapeHtml ---------- */
-function escapeHtml(s){ return String(s||'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
-
-/* ---------- init ---------- */
-function init(){
-  renderPastels();
-  loadLocal();
-  renderOrders();
-  // preview total bindings
-  $('#qty').addEventListener('change', atualizarPreviewTotal);
-  $('#refriQty').addEventListener('change', atualizarPreviewTotal);
-  $('#hasRefri').addEventListener('change', atualizarPreviewTotal);
-}
-init();
-
-/* ---------- Optional: if you want to auto-poll sheet for new orders, you can setInterval(loadFromSheet, 30000) */
-</script>
-</body>
-</html>
+        document.querySelectorAll('.service-card, .stat-item').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'all 0.6s ease-out';
+            observer.observe(el);
+        });
+    </script>
